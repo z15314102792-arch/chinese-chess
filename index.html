@@ -17,7 +17,7 @@
   <div id="menu-screen" class="screen active">
     <div class="menu-container">
       <h1 class="title">中国象棋</h1>
-      <p class="subtitle">经典策略棋类游戏 · v2.3</p>
+      <p class="subtitle">经典策略棋类游戏 · v3.0</p>
       <div class="menu-buttons">
         <button id="btn-local" class="btn btn-primary">
           <span class="btn-icon">👥</span><span>本地双人</span>
@@ -143,10 +143,15 @@
   <div id="theme-screen" class="screen">
     <div class="theme-header">
       <button id="btn-theme-back" class="btn-icon-only" title="返回" onclick="UI.showScreen('menu')">←</button>
-      <h2>棋盘主题</h2>
+      <h2>主题设置</h2>
+    </div>
+    <div class="rules-tabs" id="theme-tabs">
+      <button class="rules-tab active" data-tab="board" onclick="switchThemeTab('board',this)">🎨 棋盘样式</button>
+      <button class="rules-tab" data-tab="bg" onclick="switchThemeTab('bg',this)">🖼️ 背景主题</button>
     </div>
     <div class="theme-container">
-      <div id="theme-grid" class="theme-grid"></div>
+      <div id="theme-grid-board" class="theme-grid theme-panel active"></div>
+      <div id="theme-grid-bg" class="theme-grid theme-panel"></div>
     </div>
   </div>
 

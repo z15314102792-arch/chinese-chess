@@ -15,95 +15,146 @@ const UI = (() => {
 
   // ==================== 主题系统 ====================
 
-  /** 预设主题 */
-  const THEMES = [
-    {
-      id: 'classic', name: '经典木纹', emoji: '🪵',
+  /** 棋盘主题（12套） */
+  const BOARD_THEMES = [
+    { id: 'classic', name: '经典木纹', emoji: '🪵',
       boardBg: '#c8a96e', boardLine: '#5c3a1e',
       pieceR: ['#ffe8c0','#f0d090','#d4a850','#b89140'],
       pieceB: ['#f8f0e0','#e8dcc8','#c8b898','#a89878'],
       pieceOuterR: '#8b2020', pieceOuterB: '#222',
       pieceInnerR: 'rgba(200,60,50,0.5)', pieceInnerB: 'rgba(80,80,80,0.45)',
-      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #1a0f0a 0%, #2c1810 50%, #1a0f0a 100%)',
-    },
-    {
-      id: 'rosewood', name: '红木雅韵', emoji: '🪑',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
+    { id: 'rosewood', name: '红木雅韵', emoji: '🪑',
       boardBg: '#b0723a', boardLine: '#4a2010',
       pieceR: ['#ffe0b0','#e8c080','#c89050','#a07030'],
       pieceB: ['#f5e8d0','#e0d0b0','#c0a880','#9a8060'],
       pieceOuterR: '#6b1818', pieceOuterB: '#1a1a1a',
       pieceInnerR: 'rgba(180,50,40,0.5)', pieceInnerB: 'rgba(70,70,70,0.45)',
-      pieceTextR: '#7a1515', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #1a0c06 0%, #2a1410 50%, #1a0c06 100%)',
-    },
-    {
-      id: 'marble', name: '汉白玉', emoji: '🏛️',
-      boardBg: '#f0e6d3', boardLine: '#8b7355',
-      pieceR: ['#fff8f0','#f5e0c0','#ddc090','#c0a070'],
-      pieceB: ['#fafaf5','#e8e0d0','#c8c0a8','#a09880'],
-      pieceOuterR: '#9b3030', pieceOuterB: '#333',
-      pieceInnerR: 'rgba(210,70,60,0.45)', pieceInnerB: 'rgba(90,90,90,0.4)',
-      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #d5cfc6 0%, #e8e2d8 50%, #d5cfc6 100%)',
-    },
-    {
-      id: 'bamboo', name: '翠竹清风', emoji: '🎋',
-      boardBg: '#c8d6b5', boardLine: '#5a6b45',
-      pieceR: ['#fff8e8','#f0e0b8','#d8c080','#b8a060'],
-      pieceB: ['#fafaf0','#e8e0c8','#c8c0a0','#a09878'],
-      pieceOuterR: '#7a4020', pieceOuterB: '#2a2a2a',
-      pieceInnerR: 'rgba(160,80,50,0.45)', pieceInnerB: 'rgba(70,70,70,0.4)',
-      pieceTextR: '#6b1810', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #d5ddd0 0%, #e8efe5 25%, #d5ddd0 50%, #c8d5c0 75%, #d5ddd0 100%)',
-    },
-    {
-      id: 'ink', name: '墨韵书香', emoji: '🖌️',
-      boardBg: '#c8bfb0', boardLine: '#4a4038',
-      pieceR: ['#faf5f0','#e8dcd0','#c8b898','#a89878'],
-      pieceB: ['#f8f4f0','#e0d8d0','#b8b0a8','#908880'],
-      pieceOuterR: '#8b3030', pieceOuterB: '#1a1a1a',
-      pieceInnerR: 'rgba(180,60,50,0.45)', pieceInnerB: 'rgba(60,60,60,0.4)',
-      pieceTextR: '#7a1818', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #e8e0d8 0%, #f0eae4 30%, #e8e0d8 60%, #ddd5c8 100%)',
-    },
-    {
-      id: 'golden', name: '金丝楠木', emoji: '✨',
+      pieceTextR: '#7a1515', pieceTextB: '#1a1a1a' },
+    { id: 'golden', name: '金丝楠木', emoji: '✨',
       boardBg: '#d4b872', boardLine: '#6b4c20',
       pieceR: ['#fff0d0','#f0d890','#d8b860','#b89840'],
       pieceB: ['#faf5e8','#e8dcc0','#c8b890','#a89868'],
       pieceOuterR: '#7a1818', pieceOuterB: '#1a1a1a',
       pieceInnerR: 'rgba(190,55,45,0.5)', pieceInnerB: 'rgba(70,70,70,0.45)',
-      pieceTextR: '#7a1515', pieceTextB: '#1a1a1a',
-      bgCSS: 'linear-gradient(135deg, #1a1008 0%, #2a1c10 50%, #1a1008 100%)',
-    },
+      pieceTextR: '#7a1515', pieceTextB: '#1a1a1a' },
+    { id: 'ebony', name: '黑檀木', emoji: '🖤',
+      boardBg: '#6b5040', boardLine: '#3a2820',
+      pieceR: ['#ffe0c0','#e8c890','#c89860','#a07840'],
+      pieceB: ['#f5f0e8','#e0d8c8','#b8b098','#908878'],
+      pieceOuterR: '#7a1818', pieceOuterB: '#111',
+      pieceInnerR: 'rgba(180,50,40,0.5)', pieceInnerB: 'rgba(60,60,60,0.4)',
+      pieceTextR: '#7a1515', pieceTextB: '#111' },
+    { id: 'cherry', name: '樱桃木', emoji: '🍒',
+      boardBg: '#c4956a', boardLine: '#6b3a2a',
+      pieceR: ['#ffe8d0','#f0d0a0','#d8a870','#b88850'],
+      pieceB: ['#faf5e8','#e8dcc8','#c8b898','#a89870'],
+      pieceOuterR: '#8b2020', pieceOuterB: '#222',
+      pieceInnerR: 'rgba(200,60,50,0.5)', pieceInnerB: 'rgba(80,80,80,0.45)',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
+    { id: 'marble', name: '汉白玉', emoji: '🏛️',
+      boardBg: '#f0e6d3', boardLine: '#8b7355',
+      pieceR: ['#fff8f0','#f5e0c0','#ddc090','#c0a070'],
+      pieceB: ['#fafaf5','#e8e0d0','#c8c0a8','#a09880'],
+      pieceOuterR: '#9b3030', pieceOuterB: '#333',
+      pieceInnerR: 'rgba(210,70,60,0.45)', pieceInnerB: 'rgba(90,90,90,0.4)',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
+    { id: 'celadon', name: '天青瓷韵', emoji: '🏺',
+      boardBg: '#b8ccc8', boardLine: '#5a7068',
+      pieceR: ['#fff8f0','#f0e0c0','#d8c090','#b8a070'],
+      pieceB: ['#fafaf5','#e8e4d8','#c8c4b0','#a0a090'],
+      pieceOuterR: '#8b3030', pieceOuterB: '#222',
+      pieceInnerR: 'rgba(200,60,50,0.45)', pieceInnerB: 'rgba(80,80,80,0.4)',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
+    { id: 'bamboo', name: '翠竹清风', emoji: '🎋',
+      boardBg: '#c8d6b5', boardLine: '#5a6b45',
+      pieceR: ['#fff8e8','#f0e0b8','#d8c080','#b8a060'],
+      pieceB: ['#fafaf0','#e8e0c8','#c8c0a0','#a09878'],
+      pieceOuterR: '#7a4020', pieceOuterB: '#2a2a2a',
+      pieceInnerR: 'rgba(160,80,50,0.45)', pieceInnerB: 'rgba(70,70,70,0.4)',
+      pieceTextR: '#6b1810', pieceTextB: '#1a1a1a' },
+    { id: 'ricepaper', name: '宣纸素白', emoji: '📜',
+      boardBg: '#e8dcc8', boardLine: '#8b7b6b',
+      pieceR: ['#fffaf5','#f0e0c8','#d8c098','#b8a078'],
+      pieceB: ['#fafaf8','#e8e4d8','#c8c4b0','#a0a090'],
+      pieceOuterR: '#9b3030', pieceOuterB: '#2a2a2a',
+      pieceInnerR: 'rgba(210,70,60,0.45)', pieceInnerB: 'rgba(80,80,80,0.4)',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
+    { id: 'ink', name: '墨韵书香', emoji: '🖌️',
+      boardBg: '#c8bfb0', boardLine: '#4a4038',
+      pieceR: ['#faf5f0','#e8dcd0','#c8b898','#a89878'],
+      pieceB: ['#f8f4f0','#e0d8d0','#b8b0a8','#908880'],
+      pieceOuterR: '#8b3030', pieceOuterB: '#1a1a1a',
+      pieceInnerR: 'rgba(180,60,50,0.45)', pieceInnerB: 'rgba(60,60,60,0.4)',
+      pieceTextR: '#7a1818', pieceTextB: '#1a1a1a' },
+    { id: 'dark', name: '暗夜模式', emoji: '🌙',
+      boardBg: '#3d3d44', boardLine: '#5e5e68',
+      pieceR: ['#ffe8d0','#f0c890','#d8a060','#b88840'],
+      pieceB: ['#f0ece8','#d8d4d0','#b0aca8','#888480'],
+      pieceOuterR: '#c04040', pieceOuterB: '#555',
+      pieceInnerR: 'rgba(220,80,70,0.5)', pieceInnerB: 'rgba(130,130,130,0.45)',
+      pieceTextR: '#d04040', pieceTextB: '#ddd' },
+    { id: 'ocean', name: '深海幽蓝', emoji: '🌊',
+      boardBg: '#8a9aaa', boardLine: '#445566',
+      pieceR: ['#fff8f0','#f0e0c0','#d8c090','#b8a070'],
+      pieceB: ['#fafaf5','#e8e4d8','#c8c4b0','#a0a090'],
+      pieceOuterR: '#8b3030', pieceOuterB: '#222',
+      pieceInnerR: 'rgba(200,60,50,0.45)', pieceInnerB: 'rgba(80,80,80,0.4)',
+      pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
   ];
 
-  /** 当前主题 */
-  let currentTheme = THEMES[0];
-  const THEME_KEY = 'chinese-chess-theme';
+  /** 背景主题 */
+  const BG_THEMES = [
+    { id: 'bg-none',   name: '纯色深邃',   emoji: '🌑', cls: '' },
+    { id: 'bg-warm',   name: '暖光浮动',   emoji: '🔥', cls: 'bg-warm' },
+    { id: 'bg-aurora', name: '极光流转',   emoji: '🌌', cls: 'bg-aurora' },
+    { id: 'bg-ink',    name: '水墨晕染',   emoji: '🎨', cls: 'bg-ink' },
+    { id: 'bg-stars',  name: '星空微烁',   emoji: '✨', cls: 'bg-stars' },
+    { id: 'bg-light',  name: '素简留白',   emoji: '🤍', cls: 'bg-light' },
+  ];
 
-  function getTheme() { return currentTheme; }
+  let currentBoardTheme = BOARD_THEMES[0];
+  let currentBgTheme = BG_THEMES[0];
+  const BOARD_KEY = 'cc-board-theme';
+  const BG_KEY = 'cc-bg-theme';
 
-  function setTheme(themeId) {
-    const t = THEMES.find(th => th.id === themeId);
+  function getBoardTheme() { return currentBoardTheme; }
+  function getBgTheme() { return currentBgTheme; }
+
+  function setBoardTheme(id) {
+    const t = BOARD_THEMES.find(th => th.id === id);
     if (!t) return;
-    currentTheme = t;
-    try { localStorage.setItem(THEME_KEY, themeId); } catch(e) { /* ignore */ }
-    // 应用背景 CSS
-    document.body.style.background = t.bgCSS;
+    currentBoardTheme = t;
+    try { localStorage.setItem(BOARD_KEY, id); } catch(e) {}
     draw();
   }
 
-  function initTheme() {
-    let saved;
-    try { saved = localStorage.getItem(THEME_KEY); } catch(e) { /* ignore */ }
-    const t = THEMES.find(th => th.id === saved) || THEMES[0];
-    currentTheme = t;
-    document.body.style.background = t.bgCSS;
+  function setBgTheme(id) {
+    const t = BG_THEMES.find(th => th.id === id);
+    if (!t) return;
+    currentBgTheme = t;
+    try { localStorage.setItem(BG_KEY, id); } catch(e) {}
+    applyBgTheme();
   }
 
-  function getThemes() { return THEMES; }
+  function applyBgTheme() {
+    // 清除旧背景类
+    const bgClasses = ['bg-warm','bg-aurora','bg-ink','bg-stars','bg-light'];
+    bgClasses.forEach(c => document.body.classList.remove(c));
+    // 应用新背景类
+    if (currentBgTheme.cls) document.body.classList.add(currentBgTheme.cls);
+  }
+
+  function initThemes() {
+    let savedB, savedG;
+    try { savedB = localStorage.getItem(BOARD_KEY); savedG = localStorage.getItem(BG_KEY); } catch(e) {}
+    currentBoardTheme = BOARD_THEMES.find(t => t.id === savedB) || BOARD_THEMES[0];
+    currentBgTheme = BG_THEMES.find(t => t.id === savedG) || BG_THEMES[0];
+    applyBgTheme();
+  }
+
+  function getBoardThemes() { return BOARD_THEMES; }
+  function getBgThemes() { return BG_THEMES; }
 
   // 绘制参数
   let cellSize = 36, padding = 40, boardPixelW = 0, boardPixelH = 0;
@@ -143,11 +194,11 @@ const UI = (() => {
       'join-error','win-modal','win-text','request-modal','request-text',
       'toast','game-hint',
       'btn-themes','btn-rules','btn-theme-back','btn-rules-back',
-      'theme-grid','rules-tabs',
+      'theme-grid-board','theme-grid-bg','theme-tabs','rules-tabs',
     ];
     ids.forEach(id => { elements[id] = document.getElementById(id); });
 
-    initTheme();
+    initThemes();
     initThemePreview();
 
     window.addEventListener('resize', () => {
@@ -217,11 +268,11 @@ const UI = (() => {
     const w = boardPixelW, h = boardPixelH, s = cellSize, p = padding;
 
     // 棋盘背景
-    ctx.fillStyle = currentTheme.boardBg;
+    ctx.fillStyle = currentBoardTheme.boardBg;
     ctx.fillRect(0, 0, w, h);
 
     // 网格线
-    ctx.strokeStyle = currentTheme.boardLine;
+    ctx.strokeStyle = currentBoardTheme.boardLine;
     ctx.lineWidth = 1;
 
     // 横线 10 条
@@ -249,7 +300,7 @@ const UI = (() => {
     drawPalace(p + 3 * s, p + 7 * s, s);   // 红方九宫 (下)
 
     // 河界文字
-    ctx.fillStyle = currentTheme.boardLine;
+    ctx.fillStyle = currentBoardTheme.boardLine;
     ctx.font = `${s * 0.55}px KaiTi, STKaiti, serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -355,7 +406,7 @@ const UI = (() => {
   }
 
   function drawPalace(x, y, s) {
-    ctx.strokeStyle = currentTheme.boardLine;
+    ctx.strokeStyle = currentBoardTheme.boardLine;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 2 * s, y + 2 * s); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x + 2 * s, y); ctx.lineTo(x, y + 2 * s); ctx.stroke();
   }
@@ -380,7 +431,7 @@ const UI = (() => {
       px - r * 0.3, py - r * 0.3, r * 0.05,  // 高光中心（左上偏移）
       px, py, r                                 // 棋子边缘
     );
-    const pc = isRed ? currentTheme.pieceR : currentTheme.pieceB;
+    const pc = isRed ? currentBoardTheme.pieceR : currentBoardTheme.pieceB;
     grad.addColorStop(0, pc[0]);
     grad.addColorStop(0.4, pc[1]);
     grad.addColorStop(0.85, pc[2]);
@@ -396,7 +447,7 @@ const UI = (() => {
     ctx.shadowOffsetY = 0;
 
     // ★ 外圈粗边框
-    const outerColor = isRed ? currentTheme.pieceOuterR : currentTheme.pieceOuterB;
+    const outerColor = isRed ? currentBoardTheme.pieceOuterR : currentBoardTheme.pieceOuterB;
     ctx.strokeStyle = outerColor;
     ctx.lineWidth = Math.max(2, r * 0.12);
     ctx.stroke();
@@ -404,14 +455,14 @@ const UI = (() => {
     // ★ 内圈高光环（模拟棋子凹陷感）
     if (r > 8) {
       ctx.beginPath(); ctx.arc(px, py, r - r * 0.15, 0, Math.PI * 2);
-      const highlightColor = isRed ? currentTheme.pieceInnerR : currentTheme.pieceInnerB;
+      const highlightColor = isRed ? currentBoardTheme.pieceInnerR : currentBoardTheme.pieceInnerB;
       ctx.strokeStyle = highlightColor;
       ctx.lineWidth = Math.max(1, r * 0.07);
       ctx.stroke();
     }
 
     // ★ 棋子文字
-    const textColor = isRed ? currentTheme.pieceTextR : currentTheme.pieceTextB;
+    const textColor = isRed ? currentBoardTheme.pieceTextR : currentBoardTheme.pieceTextB;
     ctx.fillStyle = textColor;
     // 增大字号，加粗，优化字体回退链
     ctx.font = `bold ${r * 1.3}px "STKaiti", "KaiTi", "楷体", "Noto Serif SC", "FangSong", "仿宋", "SimSun", serif`;
@@ -625,45 +676,89 @@ const UI = (() => {
 
   /** 初始化主题选择器预览 */
   function initThemePreview() {
-    const grid = elements['theme-grid'];
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    THEMES.forEach(theme => {
-      const card = document.createElement('div');
-      card.className = 'theme-card' + (theme.id === currentTheme.id ? ' selected' : '');
-      card.setAttribute('role', 'radio');
-      card.setAttribute('aria-checked', theme.id === currentTheme.id ? 'true' : 'false');
-      card.dataset.themeId = theme.id;
-
-      // 迷你预览 Canvas
-      const preview = document.createElement('canvas');
-      preview.width = 120; preview.height = 80;
-      preview.className = 'theme-preview';
-      drawThemePreview(preview, theme);
-
-      const label = document.createElement('span');
-      label.className = 'theme-label';
-      label.textContent = theme.emoji + ' ' + theme.name;
-
-      card.appendChild(preview);
-      card.appendChild(label);
-
-      card.addEventListener('click', () => {
-        setTheme(theme.id);
-        // 更新选中状态
-        grid.querySelectorAll('.theme-card').forEach(c => {
-          c.classList.toggle('selected', c.dataset.themeId === theme.id);
-          c.setAttribute('aria-checked', c.dataset.themeId === theme.id ? 'true' : 'false');
-        });
+    // 棋盘主题网格
+    const boardGrid = elements['theme-grid-board'];
+    if (boardGrid) {
+      boardGrid.innerHTML = '';
+      BOARD_THEMES.forEach(theme => {
+        const card = createBoardCard(theme, boardGrid);
+        boardGrid.appendChild(card);
       });
+    }
 
-      grid.appendChild(card);
+    // 背景主题网格
+    const bgGrid = elements['theme-grid-bg'];
+    if (bgGrid) {
+      bgGrid.innerHTML = '';
+      BG_THEMES.forEach(theme => {
+        const card = createBgCard(theme, bgGrid);
+        bgGrid.appendChild(card);
+      });
+    }
+  }
+
+  function createBoardCard(theme, grid) {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (theme.id === currentBoardTheme.id ? ' selected' : '');
+    card.setAttribute('role', 'radio');
+    card.setAttribute('aria-checked', theme.id === currentBoardTheme.id ? 'true' : 'false');
+    card.dataset.themeId = theme.id;
+
+    const preview = document.createElement('canvas');
+    preview.width = 120; preview.height = 80;
+    preview.className = 'theme-preview';
+    drawBoardPreview(preview, theme);
+
+    const label = document.createElement('span');
+    label.className = 'theme-label';
+    label.textContent = theme.emoji + ' ' + theme.name;
+
+    card.appendChild(preview);
+    card.appendChild(label);
+
+    card.addEventListener('click', () => {
+      setBoardTheme(theme.id);
+      grid.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.themeId === theme.id);
+        c.setAttribute('aria-checked', c.dataset.themeId === theme.id ? 'true' : 'false');
+      });
     });
+
+    return card;
+  }
+
+  function createBgCard(theme, grid) {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (theme.id === currentBgTheme.id ? ' selected' : '');
+    card.setAttribute('role', 'radio');
+    card.setAttribute('aria-checked', theme.id === currentBgTheme.id ? 'true' : 'false');
+    card.dataset.bgId = theme.id;
+
+    // 背景预览：用 div + 背景类
+    const preview = document.createElement('div');
+    preview.className = 'bg-preview';
+    if (theme.cls) preview.classList.add(theme.cls);
+
+    const label = document.createElement('span');
+    label.className = 'theme-label';
+    label.textContent = theme.emoji + ' ' + theme.name;
+
+    card.appendChild(preview);
+    card.appendChild(label);
+
+    card.addEventListener('click', () => {
+      setBgTheme(theme.id);
+      grid.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.bgId === theme.id);
+        c.setAttribute('aria-checked', c.dataset.bgId === theme.id ? 'true' : 'false');
+      });
+    });
+
+    return card;
   }
 
   /** 在迷你 Canvas 上绘制棋盘预览 */
-  function drawThemePreview(canvas, theme) {
+  function drawBoardPreview(canvas, theme) {
     const pc = canvas.getContext('2d');
     const pw = canvas.width, ph = canvas.height;
     const margin = 6;
@@ -783,6 +878,7 @@ const UI = (() => {
     showToast, showRoomInfo, hideRoomInfo, showJoinError,
     getInputRoomId, getElement, onMove,
     // 主题
-    getTheme, setTheme, initTheme, getThemes, initThemePreview,
+    getBoardTheme, getBgTheme, setBoardTheme, setBgTheme,
+    getBoardThemes, getBgThemes, initThemePreview,
   };
 })();

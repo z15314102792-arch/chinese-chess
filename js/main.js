@@ -819,3 +819,15 @@ function switchRulesTab(tabName, btn) {
     });
   }
 }
+
+/** 主题页 Tab 切换（全局函数） */
+function switchThemeTab(tabName, btn) {
+  const tabs = document.getElementById('theme-tabs');
+  if (tabs) {
+    tabs.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', t === btn));
+  }
+  const boardGrid = document.getElementById('theme-grid-board');
+  const bgGrid = document.getElementById('theme-grid-bg');
+  if (boardGrid) boardGrid.classList.toggle('active', tabName === 'board');
+  if (bgGrid) bgGrid.classList.toggle('active', tabName === 'bg');
+}
