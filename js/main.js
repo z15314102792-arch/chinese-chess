@@ -512,6 +512,7 @@ const Main = (() => {
         onDisconnected: onP2PDisconnected,
         onMove: onP2PMove,
         onError: onP2PError,
+        onStatusChange: onP2PStatusChange,
       });
       console.log('[Main] 联机界面初始化完成');
     } catch(e) {
@@ -696,6 +697,32 @@ const Main = (() => {
     const joinBtn = UI.getElement('btn-join-room');
     if (createBtn) { createBtn.disabled = false; createBtn.textContent = '创建房间'; }
     if (joinBtn) { joinBtn.disabled = false; joinBtn.textContent = '加入'; }
+  }
+
+  /** 信令服务器连接状态变化 */
+  function onP2PStatusChange(status, id, oldId) {
+    console.log('[Main] P2P 状态:', status, id);
+    switch (status) {
+      case 'signaling-disconnected':
+        // 房主与信令服务器断线，房间号可能已失效
+        if (P2P.getStatus().isHost) {
+          UI.showToast('⚠️ 连接断开，正在自动重连…新的房间号即将更新', 6000);
+        }
+        break;
+      case 'reconnected':
+        // 重连成功，房间号已更新
+        UI.showToast('已重连！新房间号：' + id, 6000);
+        UI.showRoomInfo(id);
+        // 更新按钮文案
+        const btn = UI.getElement('btn-create-room');
+        if (btn) btn.textContent = '房间已创建（已更新）';
+        break;
+      case 'signaling-connected':
+        // 首次连接成功——如果之前有"断开"则清除提示
+        break;
+      case 'closed':
+        break;
+    }
   }
 
   function acceptRequest() {
