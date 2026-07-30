@@ -12,7 +12,7 @@ const UI = (() => {
   const elements = {};
 
   // 绘制参数
-  let cellSize = 0, padding = 40, boardPixelW = 0, boardPixelH = 0;
+  let cellSize = 40, padding = 40, boardPixelW = 0, boardPixelH = 0;
 
   // 交互状态
   let selectedPos = null;       // {x, y} 当前选中的棋子
@@ -47,12 +47,16 @@ const UI = (() => {
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
 
-    registerSW();
+    cleanupSW();
   }
 
-  function registerSW() {
+  function cleanupSW() {
+    // 清除所有旧 Service Worker 和缓存，解决反复出现的缓存问题
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     }
   }
 
