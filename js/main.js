@@ -36,29 +36,20 @@ const Main = (() => {
 
   /** 初始化 */
   function init() {
-    try {
-      UI.init(Board);
-      UI.onMove(handlePlayerMove);
-      bindButtons();
-      UI.getElement('btn-play-again').addEventListener('click', handlePlayAgain);
-      UI.getElement('btn-to-menu').addEventListener('click', goToMenu);
-      UI.getElement('btn-request-accept').addEventListener('click', () => acceptRequest());
-      UI.getElement('btn-request-reject').addEventListener('click', () => rejectRequest());
+    UI.init(Board);
+    UI.onMove(handlePlayerMove);
+    bindButtons();
+    UI.getElement('btn-play-again').addEventListener('click', handlePlayAgain);
+    UI.getElement('btn-to-menu').addEventListener('click', goToMenu);
+    UI.getElement('btn-request-accept').addEventListener('click', () => acceptRequest());
+    UI.getElement('btn-request-reject').addEventListener('click', () => rejectRequest());
 
-      wakeLockSupported = 'wakeLock' in navigator;
-      document.addEventListener('visibilitychange', onVisibilityChange);
+    wakeLockSupported = 'wakeLock' in navigator;
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
-      checkURLParams();
-      UI.showScreen('menu');
-      console.log('[Main] 中国象棋已就绪');
-    } catch (e) {
-      console.error('[Main] 初始化失败:', e);
-      var panel = document.getElementById('error-panel');
-      if (panel) {
-        panel.style.display = 'block';
-        panel.textContent = '初始化失败: ' + e.message + '\n' + (e.stack || '');
-      }
-    }
+    checkURLParams();
+    UI.showScreen('menu');
+    console.log('[Main] 中国象棋已就绪');
   }
 
   // ==================== 防后台断线 ====================

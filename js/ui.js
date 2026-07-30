@@ -12,7 +12,7 @@ const UI = (() => {
   const elements = {};
 
   // 绘制参数
-  let cellSize = 40, padding = 40, boardPixelW = 0, boardPixelH = 0;
+  let cellSize = 36, padding = 40, boardPixelW = 0, boardPixelH = 0;
 
   // 交互状态
   let selectedPos = null;       // {x, y} 当前选中的棋子
@@ -47,16 +47,12 @@ const UI = (() => {
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
 
-    cleanupSW();
+    registerSW();
   }
 
-  function cleanupSW() {
-    // 清除所有旧 Service Worker 和缓存，解决反复出现的缓存问题
+  function registerSW() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(r => r.unregister());
-      });
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      navigator.serviceWorker.register('sw.js').catch(() => {});
     }
   }
 
@@ -103,7 +99,6 @@ const UI = (() => {
 
   function draw() {
     if (!ctx || !canvas || cellSize <= 0) return;
-    try {
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -205,7 +200,6 @@ const UI = (() => {
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(tx, ty, s * 0.28, 0, Math.PI * 2); ctx.stroke();
     }
-    } catch(e) { console.error('draw:', e); }
   }
 
   function drawPalace(x, y, s) {
