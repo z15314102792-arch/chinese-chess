@@ -103,20 +103,28 @@ const UI = (() => {
       pieceTextR: '#8b1a1a', pieceTextB: '#1a1a1a' },
   ];
 
-  /** 背景主题（12套，含Canvas粒子） */
+  /** 背景主题 */
   const BG_THEMES = [
-    { id: 'bg-none',    name: '纯色深邃',   emoji: '🌑', cls: '', dynamic: false },
-    { id: 'bg-warm',    name: '暖光浮动',   emoji: '🔥', cls: 'bg-warm', dynamic: true },
-    { id: 'bg-sunset',  name: '落日熔金',   emoji: '🌅', cls: 'bg-sunset', dynamic: true },
-    { id: 'bg-aurora',  name: '极光流转',   emoji: '🌌', cls: 'bg-aurora', dynamic: true },
-    { id: 'bg-ocean',   name: '深海暗涌',   emoji: '🌊', cls: 'bg-ocean', dynamic: true },
-    { id: 'bg-embers',  name: '余烬微光',   emoji: '🔥', cls: 'bg-embers', dynamic: true },
-    { id: 'bg-forest',  name: '竹林幽影',   emoji: '🌿', cls: 'bg-forest', dynamic: true },
-    { id: 'bg-jade',    name: '玉润流光',   emoji: '💎', cls: 'bg-jade', dynamic: true },
-    { id: 'bg-ink',     name: '水墨晕染',   emoji: '🎨', cls: 'bg-ink', dynamic: true },
-    { id: 'bg-stars',   name: '星空微烁',   emoji: '✨', cls: 'bg-stars', dynamic: true },
-    { id: 'bg-light',   name: '素简留白',   emoji: '🤍', cls: 'bg-light', dynamic: true },
-    { id: 'bg-particle',name: '禅意粒子',   emoji: '🧘', cls: 'bg-particle', dynamic: true },
+    { id: 'bg-none',     name: '纯色深邃',    emoji: '🌑', cls: '', dynamic: false },
+    { id: 'bg-stripes',  name: '流金条纹',    emoji: '📐', cls: 'bg-stripes', dynamic: true },
+    { id: 'bg-ripple',   name: '涟漪扩散',    emoji: '🫧', cls: 'bg-ripple', dynamic: true },
+    { id: 'bg-orbs',     name: '浮光掠影',    emoji: '🔮', cls: 'bg-orbs', dynamic: true },
+    { id: 'bg-spin',     name: '几何星芒',    emoji: '✦', cls: 'bg-spin', dynamic: true },
+    { id: 'bg-breath',   name: '呼吸脉冲',    emoji: '💜', cls: 'bg-breath', dynamic: true },
+    { id: 'bg-scan',     name: '扫描光束',    emoji: '🔍', cls: 'bg-scan', dynamic: true },
+    { id: 'bg-aurora',   name: '极光帷幕',    emoji: '🌌', cls: 'bg-aurora', dynamic: true },
+    { id: 'bg-petals',   name: '樱花飘落',    emoji: '🌸', cls: 'bg-petals', dynamic: true },
+    { id: 'bg-rain',     name: '细雨纷飞',    emoji: '🌧️', cls: 'bg-rain', dynamic: true },
+    { id: 'bg-mesh',     name: '网格滑移',    emoji: '📊', cls: 'bg-mesh', dynamic: true },
+    { id: 'bg-wave',     name: '波浪起伏',    emoji: '🌊', cls: 'bg-wave', dynamic: true },
+    { id: 'bg-lava',     name: '熔岩暗涌',    emoji: '🌋', cls: 'bg-lava', dynamic: true },
+    { id: 'bg-morph',    name: '液态流形',    emoji: '💧', cls: 'bg-morph', dynamic: true },
+    { id: 'bg-nebula',   name: '星云幻境',    emoji: '💫', cls: 'bg-nebula', dynamic: true },
+    { id: 'bg-frost',    name: '冰霜结晶',    emoji: '❄️', cls: 'bg-frost', dynamic: true },
+    { id: 'bg-stars',    name: '极夜星空',    emoji: '✨', cls: 'bg-stars', dynamic: true },
+    { id: 'bg-volt',     name: '雷电脉冲',    emoji: '⚡', cls: 'bg-volt', dynamic: true },
+    { id: 'bg-light',    name: '晨曦微光',    emoji: '🤍', cls: 'bg-light', dynamic: true },
+    { id: 'bg-particle', name: '禅意粒子',    emoji: '🧘', cls: 'bg-particle', dynamic: true },
   ];
 
   let currentBoardTheme = BOARD_THEMES[0];
@@ -144,9 +152,8 @@ const UI = (() => {
   }
 
   function applyBgTheme() {
-    // 清除旧背景类
-    const bgClasses = ['bg-warm','bg-sunset','bg-aurora','bg-ocean','bg-embers','bg-forest','bg-jade','bg-ink','bg-stars','bg-light','bg-particle'];
-    bgClasses.forEach(c => document.body.classList.remove(c));
+    // 清除所有 bg- 前缀的背景类（用 BG_THEMES 动态获取）
+    BG_THEMES.forEach(t => { if (t.cls) document.body.classList.remove(t.cls); });
     // 应用新背景类
     if (currentBgTheme.cls) document.body.classList.add(currentBgTheme.cls);
     // Canvas 粒子管理
