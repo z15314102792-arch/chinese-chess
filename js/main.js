@@ -387,48 +387,53 @@ const Main = (() => {
 
   function doLocalUndo() {
     stopTimer();
-    Board.undoOne();
-    UI.clearAll();
-    UI.setMoveCount(Board.getMoveCount());
-    updatePlayerCards();
-    UI.setHint('已悔棋');
-    setTimeout(() => UI.setHint(''), 2000);
-    if (!gameOver) startTimer(Board.getCurrentPlayer());
+    const last = Board.undoOne();
+    if (last) {
+      UI.animateUndo(last.fx, last.fy, last.tx, last.ty, last.piece, () => {
+        UI.setMoveCount(Board.getMoveCount());
+        updatePlayerCards();
+        UI.setHint('');
+      });
+    }
   }
 
   function doAiUndo() {
     stopTimer();
-    // 第一步：撤销 AI 走子
-    const last = Board.undoOne();
-    UI.clearSelection();
-    if (last) {
-      UI.setLastMove(last.tx, last.ty, last.fx, last.fy, last.piece);
+    // 第一步：撤销 AI 走子 + 动画滑回（300ms）
+    const aiMove = Board.undoOne();
+    if (aiMove) {
+      UI.animateUndo(aiMove.fx, aiMove.fy, aiMove.tx, aiMove.ty, aiMove.piece, () => {
+        // 第二步：撤销玩家走子 + 动画滑回（300ms）
+        const plMove = Board.undoOne();
+        if (plMove) {
+          UI.animateUndo(plMove.fx, plMove.fy, plMove.tx, plMove.ty, plMove.piece, () => {
+            UI.setMoveCount(Board.getMoveCount());
+            updatePlayerCards();
+            UI.setHint('');
+          });
+        }
+      });
     }
-    UI.draw();
-    UI.setHint('撤回 AI 走子…');
-
-    // 250ms 后撤销玩家走子（让玩家看清每一步）
-    setTimeout(() => {
-      Board.undoOne();
-      UI.clearSelection();
-      UI.draw();
-      UI.setMoveCount(Board.getMoveCount());
-      updatePlayerCards();
-      UI.setHint('已悔棋');
-      setTimeout(() => UI.setHint(''), 2000);
-    }, 250);
   }
 
   function doOnlineUndo() {
     stopTimer();
-    Board.undo();
-    isMyTurn = true;
-    UI.clearAll();
-    UI.setMoveCount(Board.getMoveCount());
-    updatePlayerCards();
-    UI.setHint('已悔棋');
-    setTimeout(() => UI.setHint(''), 2000);
-    if (!gameOver) startTimer(Board.getCurrentPlayer());
+    // 联机悔棋：撤销对手最后一步 + 自己上一步（共两步）
+    const last1 = Board.undoOne();
+    if (last1) {
+      UI.animateUndo(last1.fx, last1.fy, last1.tx, last1.ty, last1.piece, () => {
+        const last2 = Board.undoOne();
+        if (last2) {
+          UI.animateUndo(last2.fx, last2.fy, last2.tx, last2.ty, last2.piece, () => {
+            isMyTurn = true;
+            UI.setMoveCount(Board.getMoveCount());
+            updatePlayerCards();
+            UI.setHint('');
+            if (!gameOver) startTimer(Board.getCurrentPlayer());
+          });
+        }
+      });
+    }
   }
 
   // ==================== 重新开始 ====================

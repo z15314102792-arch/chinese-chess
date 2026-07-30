@@ -387,6 +387,36 @@ const UI = (() => {
     animRAF = requestAnimationFrame(animLoop);
   }
 
+  /**
+   * 悔棋动画：棋子从终点滑回起点（300ms ease-out）
+   * 调研参考：chesscanvas / TaylorPzreal/chinese-chess
+   */
+  function animateUndo(fromX, fromY, toX, toY, piece, onDone) {
+    // 先画好上一步标记
+    lastFrom = { x: toX, y: toY };
+    lastTo = { x: fromX, y: fromY };
+    lastMoveColor = piece ? board.getColor(piece) : null;
+
+    animPiece = piece;
+    animFromX = toX; animFromY = toY;  // 从目标位
+    animToX = fromX; animToY = fromY;  // 滑回原位
+    animStart = performance.now();
+
+    function animLoop(now) {
+      const elapsed = now - animStart;
+      if (elapsed >= 300) {
+        animPiece = null;
+        draw();
+        if (onDone) onDone();
+        return;
+      }
+      draw();
+      animRAF = requestAnimationFrame(animLoop);
+    }
+    if (animRAF) cancelAnimationFrame(animRAF);
+    animRAF = requestAnimationFrame(animLoop);
+  }
+
   function setLastMove(fx, fy, tx, ty, piece) {
     lastFrom = { x: fx, y: fy };
     lastTo = { x: tx, y: ty };
@@ -507,7 +537,7 @@ const UI = (() => {
   return {
     init, draw, showScreen, resizeCanvas,
     selectPiece, clearSelection, setLastMove, clearLastMove, clearAll,
-    startMoveAnimation,
+    startMoveAnimation, animateUndo,
     setCheckHighlight, clearCheckHighlight,
     setPlayerCards, updateTimerDisplay, setTimerUrgent,
     setMoveCount, setHint,
