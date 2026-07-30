@@ -15,6 +15,15 @@ const P2P = (() => {
   let onMove = null;
   let onError = null;
 
+  // ICE 服务器配置（STUN 辅助 NAT 穿透）
+  const ICE_SERVERS = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+    ],
+  };
+
   function init(callbacks) {
     onConnected = callbacks.onConnected || null;
     onDisconnected = callbacks.onDisconnected || null;
@@ -24,7 +33,7 @@ const P2P = (() => {
 
   function createRoom() {
     destroy();
-    peer = new Peer({ debug: 0 });
+    peer = new Peer({ debug: 0, config: ICE_SERVERS });
 
     return new Promise((resolve, reject) => {
       peer.on('open', (id) => {
@@ -40,8 +49,8 @@ const P2P = (() => {
       });
 
       peer.on('error', (err) => {
-        console.error('[P2P] 错误:', err);
-        if (onError) onError('连接服务异常，请重试');
+        console.error('[P2P] 信令服务器错误:', err);
+        if (onError) onError('信令服务连接失败，请检查网络');
         reject(err);
       });
     });
@@ -49,7 +58,7 @@ const P2P = (() => {
 
   function joinRoom(remoteId) {
     destroy();
-    peer = new Peer({ debug: 0 });
+    peer = new Peer({ debug: 0, config: ICE_SERVERS });
 
     return new Promise((resolve, reject) => {
       peer.on('open', () => {
@@ -60,7 +69,9 @@ const P2P = (() => {
         connection = conn;
 
         const timeout = setTimeout(() => {
-          if (!isConnected) reject(new Error('连接超时，请确认房间号正确'));
+          if (!isConnected) {
+            reject(new Error('连接超时——请确认房间号正确且双方网络可达'));
+          }
         }, 15000);
 
         conn.on('open', () => {
@@ -73,12 +84,22 @@ const P2P = (() => {
 
         conn.on('data', handleData);
         conn.on('close', handleClose);
-        conn.on('error', (err) => { console.error('[P2P] DataChannel 错误:', err); });
+        conn.on('error', (err) => {
+          console.error('[P2P] DataChannel 错误:', err);
+          if (onError) onError('数据通道错误，请重试');
+        });
       });
 
       peer.on('error', (err) => {
-        console.error('[P2P] 错误:', err);
-        if (onError) onError('无法连接到对方');
+        console.error('[P2P] PeerJS 错误:', err);
+        // 根据错误类型给出具体提示
+        if (err.type === 'peer-unavailable') {
+          if (onError) onError('房间不存在或对方已离线');
+        } else if (err.type === 'network' || err.type === 'socket-error') {
+          if (onError) onError('网络连接失败，请检查网络');
+        } else {
+          if (onError) onError('连接失败: ' + (err.message || '未知错误'));
+        }
         reject(err);
       });
     });

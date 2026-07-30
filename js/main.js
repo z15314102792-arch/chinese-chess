@@ -387,14 +387,29 @@ const Main = (() => {
 
   function doLocalUndo() {
     stopTimer();
-    const last = Board.undoOne();
-    if (last) {
-      UI.animateUndo(last.fx, last.fy, last.tx, last.ty, last.piece, () => {
-        UI.setMoveCount(Board.getMoveCount());
-        updatePlayerCards();
-        UI.setHint('');
-      });
-    }
+    // ★ 悔棋规则：回到「自己上一步之前」
+    // 需要撤销对手的上一步 + 自己的再上一步，共2步（与AI模式一致）
+    const last1 = Board.undoOne();  // 撤销对手最后一步
+    if (!last1) return;
+    UI.animateUndo(last1.fx, last1.fy, last1.tx, last1.ty, last1.piece, () => {
+      if (Board.getHistoryLength() > 0) {
+        const last2 = Board.undoOne();  // 撤销自己的上一步
+        if (last2) {
+          UI.animateUndo(last2.fx, last2.fy, last2.tx, last2.ty, last2.piece, () => {
+            UI.setMoveCount(Board.getMoveCount());
+            updatePlayerCards();
+            UI.setHint('');
+            if (!gameOver) startTimer(Board.getCurrentPlayer());
+          });
+          return;
+        }
+      }
+      // 只有1步历史（对手第一步后立即悔棋）
+      UI.setMoveCount(Board.getMoveCount());
+      updatePlayerCards();
+      UI.setHint('');
+      if (!gameOver) startTimer(Board.getCurrentPlayer());
+    });
   }
 
   function doAiUndo() {
