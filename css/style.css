@@ -43,9 +43,9 @@ html, body {
 .btn-secondary { background: linear-gradient(135deg, var(--secondary), #3b2d6e); box-shadow: 0 4px 15px rgba(83, 52, 131, 0.4); }
 .btn-accent { background: linear-gradient(135deg, #8b4513, #5c2e0a); box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4); }
 .btn-small { padding: 8px 16px; font-size: 0.9rem; border-radius: 10px; min-height: 40px; width: auto; }
-.btn-icon-only { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ddd; font-size: 1.3rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; transition: background 0.15s, opacity 0.15s, color 0.15s; flex-shrink: 0; }
-.btn-icon-only:active { background: rgba(255,255,255,0.18); color: #fff; }
-.btn-icon-only:disabled { opacity: 0.25; cursor: default; background: rgba(255,255,255,0.04); }
+.btn-icon-only { background: rgba(0,0,0,0.40); border: 1px solid rgba(255,255,255,0.20); color: #f0f0f0; font-size: 1.3rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; transition: background 0.15s, opacity 0.15s, color 0.15s; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.btn-icon-only:active { background: rgba(0,0,0,0.60); color: #fff; border-color: rgba(255,255,255,0.35); }
+.btn-icon-only:disabled { opacity: 0.30; cursor: default; background: rgba(0,0,0,0.20); }
 
 /* ===== 游戏界面头部 ===== */
 .game-header {
@@ -255,12 +255,11 @@ body.bg-orbs {
 
 /* ==== 4. 几何星芒 —— conic-gradient + rotate ==== */
 @keyframes starburstSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-body.bg-spin {
-  background-color: #18181a;
-}
+body.bg-spin { background: none; }
 body.bg-spin::before {
   content: ''; position: fixed; inset: -20%; z-index: -1;
-  background: repeating-conic-gradient(from 0deg,
+  background-color: #18181a;
+  background-image: repeating-conic-gradient(from 0deg,
     #222226 0deg 4deg, #2a2a2e 4deg 5deg,
     #222226 5deg 18deg, #2a2a2e 18deg 19deg,
     #222226 19deg 30deg);
@@ -272,23 +271,21 @@ body.bg-spin::before {
   0%, 100% { opacity: 0.45; transform: scale(1); }
   50%      { opacity: 0.90; transform: scale(1.3); }
 }
-body.bg-breath {
-  background-color: #0c041c;
-}
+body.bg-breath { background: none; }
 body.bg-breath::before {
   content: ''; position: fixed; inset: 0; z-index: -1;
-  background: radial-gradient(ellipse at center, #5a28b8 0%, #1e0850 50%, #0c041c 100%);
+  background-color: #0c041c;
+  background-image: radial-gradient(ellipse at center, #5a28b8 0%, #1e0850 50%, #0c041c 100%);
   animation: breathePulse 5s ease-in-out infinite;
 }
 
 /* ==== 6. 扫描光束 —— linear-gradient 光束横扫 ==== */
 @keyframes scanBeam { 0% { left: -120%; } 100% { left: 200%; } }
-body.bg-scan {
-  background-color: #030d18;
-}
+body.bg-scan { background: none; }
 body.bg-scan::before {
   content: ''; position: fixed; top: 0; left: -120%; width: 60%; height: 100%; z-index: -1;
-  background: linear-gradient(to right,
+  background-color: #030d18;
+  background-image: linear-gradient(to right,
     transparent 0%,
     rgba(0,200,220,0.06) 40%,
     rgba(0,200,220,0.40) 50%,
@@ -431,9 +428,10 @@ body.bg-nebula {
   0%, 100% { opacity: 0.35; }
   50%      { opacity: 0.75; }
 }
-body.bg-frost { background-color: #0a101c; }
+body.bg-frost { background: none; }
 body.bg-frost::before {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: #0a101c;
   background-image:
     radial-gradient(3px 3px at 15% 30%, rgba(180,220,255,0.80), transparent),
     radial-gradient(2px 2px at 25% 60%, rgba(200,230,255,0.60), transparent),
@@ -450,9 +448,10 @@ body.bg-frost::before {
 
 /* ==== 16. 极夜星空 —— 密集星场 + 缓慢旋转 ==== */
 @keyframes starfieldRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-body.bg-stars { background-color: #040410; }
+body.bg-stars { background: none; }
 body.bg-stars::before {
   content: ''; position: fixed; inset: -10%; z-index: -1;
+  background-color: #040410;
   background-image:
     radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.90), transparent),
     radial-gradient(1px 1px at 22% 45%, rgba(210,220,255,0.55), transparent),
@@ -476,10 +475,11 @@ body.bg-stars::before {
   0%, 92%, 94%, 100% { opacity: 0; }
   93% { opacity: 0.55; }
 }
-body.bg-volt { background-color: #0a0a18; }
+body.bg-volt { background: none; }
 body.bg-volt::before {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(ellipse at 40% 50%,
+  background-color: #0a0a18;
+  background-image: radial-gradient(ellipse at 40% 50%,
     rgba(100,200,255,0.70) 0%, rgba(60,160,240,0.30) 30%, transparent 60%);
   animation: voltFlash 6s ease-in-out infinite;
 }
@@ -495,12 +495,11 @@ body.bg-volt::after {
   0%, 100% { background-position: 40% 50%; opacity: 0.55; }
   50%      { background-position: 60% 50%; opacity: 1.0; }
 }
-body.bg-light {
-  background-color: #e8e4de;
-}
+body.bg-light { background: none; }
 body.bg-light::before {
   content: ''; position: fixed; inset: 0; z-index: -1;
-  background: radial-gradient(ellipse at 50% 50%, #fef8f2 0%, #e8e4de 40%, #d8d0c8 100%);
+  background-color: #e8e4de;
+  background-image: radial-gradient(ellipse at 50% 50%, #fef8f2 0%, #e8e4de 40%, #d8d0c8 100%);
   background-size: 180% 180%;
   animation: dawnBreath 6s ease-in-out infinite;
 }
