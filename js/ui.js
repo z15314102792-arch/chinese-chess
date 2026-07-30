@@ -19,6 +19,8 @@ const UI = (() => {
   let legalMoves = [];          // [{x, y}, ...] 合法目标位置
   let lastFrom = null;          // {x, y} 上一步起点
   let lastTo = null;            // {x, y} 上一步终点
+  let checkKingPos = null;      // {x, y} 被将军的帅/将位置
+  let checkFlash = 0;           // 将军闪烁计数器
 
   /** 初始化 */
   function init(boardModule) {
@@ -200,6 +202,21 @@ const UI = (() => {
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(tx, ty, s * 0.28, 0, Math.PI * 2); ctx.stroke();
     }
+
+    // ★ 将军高亮 —— 被将的帅/将红色脉冲
+    if (checkKingPos) {
+      const kx = p + checkKingPos.x * s, ky = p + checkKingPos.y * s;
+      // 外圈脉冲光晕（相位随 checkFlash 变化）
+      const phase = checkFlash * 0.1;
+      const alpha = 0.5 + 0.5 * Math.sin(phase);
+      ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(kx, ky, s * 0.52, 0, Math.PI * 2); ctx.stroke();
+      // 第二圈更大光晕
+      ctx.strokeStyle = `rgba(255,50,50,${alpha * 0.6})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(kx, ky, s * 0.58, 0, Math.PI * 2); ctx.stroke();
+    }
   }
 
   function drawPalace(x, y, s) {
@@ -299,6 +316,10 @@ const UI = (() => {
   function selectPiece(x, y) {
     selectedPos = { x, y };
     legalMoves = board.getLegalMoves(x, y);
+    // 将军时选中的棋子无法应将 → 提示
+    if (legalMoves.length === 0 && board.isInCheck(board.getCurrentPlayer())) {
+      showToast('必须应将！请选择能解除将军的棋子', 1500);
+    }
     draw();
   }
 
@@ -339,7 +360,30 @@ const UI = (() => {
   function clearAll() {
     clearSelection();
     clearLastMove();
+    clearCheckHighlight();
     draw();
+  }
+
+  // ==================== 将军提醒 ====================
+
+  let checkFlashTimer = null;
+
+  function setCheckHighlight(color) {
+    checkKingPos = Board.findKing(color);
+    checkFlash = 0;
+    draw();
+    // 启动闪烁动画（每100ms更新）
+    if (checkFlashTimer) clearInterval(checkFlashTimer);
+    checkFlashTimer = setInterval(() => {
+      checkFlash++;
+      draw();
+    }, 100);
+  }
+
+  function clearCheckHighlight() {
+    checkKingPos = null;
+    checkFlash = 0;
+    if (checkFlashTimer) { clearInterval(checkFlashTimer); checkFlashTimer = null; }
   }
 
   // ==================== 玩家卡片 ====================
@@ -429,6 +473,7 @@ const UI = (() => {
   return {
     init, draw, showScreen, resizeCanvas,
     selectPiece, clearSelection, setLastMove, clearLastMove, clearAll,
+    setCheckHighlight, clearCheckHighlight,
     setPlayerCards, updateTimerDisplay, setTimerUrgent,
     setMoveCount, setHint,
     showWin, hideWin, showRequest, hideRequest,

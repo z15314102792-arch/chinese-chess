@@ -218,6 +218,43 @@ const Main = (() => {
     return m + ':' + String(s).padStart(2, '0');
   }
 
+  /** 将军提醒体系：横幅+棋盘高亮+红框（双方不同显示） */
+  function showCheckStatus() {
+    const current = Board.getCurrentPlayer();
+    const banner = document.getElementById('check-banner');
+
+    if (Board.isInCheck(current)) {
+      // 当前走子方被将军
+      banner.textContent = '⚠ 被将军！';
+      banner.className = 'check-banner defender';
+      UI.setCheckHighlight(current);
+      UI.setHint('');
+
+      // 被将方卡片红框
+      const cardId = current === Board.RED ? 'red-card' : 'black-card';
+      document.getElementById(cardId).classList.add('timeout');
+    } else {
+      // 检查是否上将（当前方刚刚将军了对方）
+      const opponent = current === Board.RED ? Board.BLACK : Board.RED;
+      if (Board.isInCheck(opponent)) {
+        banner.textContent = '将军！';
+        banner.className = 'check-banner attacker';
+        UI.setCheckHighlight(opponent);
+        UI.setHint('');
+        // 被将方卡片红框
+        const cardId = opponent === Board.RED ? 'red-card' : 'black-card';
+        document.getElementById(cardId).classList.add('timeout');
+      } else {
+        banner.className = 'check-banner hidden';
+        UI.clearCheckHighlight();
+        UI.setHint('');
+        // 清除卡片红框
+        document.getElementById('red-card').classList.remove('timeout');
+        document.getElementById('black-card').classList.remove('timeout');
+      }
+    }
+  }
+
   // ==================== 走子处理 ====================
 
   function handlePlayerMove(fx, fy, tx, ty) {
@@ -265,11 +302,8 @@ const Main = (() => {
       return true;
     }
 
-    if (Board.isInCheck(opponent)) {
-      UI.setHint('将军！');
-    } else {
-      UI.setHint('');
-    }
+    // ★ 将军提醒体系
+    showCheckStatus();
 
     updatePlayerCards();
 
@@ -305,7 +339,7 @@ const Main = (() => {
             setTimeout(() => UI.showWin(Board.BLACK, false), 800);
           } else {
             updatePlayerCards();
-            UI.setHint(Board.isInCheck(Board.RED) ? '将军！' : '');
+            showCheckStatus();
           }
         }
         aiThinking = false;
@@ -495,6 +529,9 @@ const Main = (() => {
     UI.hideWin();
     UI.hideRequest();
     UI.setHint('');
+    document.getElementById('check-banner').className = 'check-banner hidden';
+    document.getElementById('red-card').classList.remove('timeout');
+    document.getElementById('black-card').classList.remove('timeout');
     UI.showScreen('game');
     UI.resizeCanvas();
     UI.clearAll();
@@ -597,7 +634,7 @@ const Main = (() => {
       return;
     }
 
-    UI.setHint(Board.isInCheck(me) ? '将军！' : '');
+    showCheckStatus();
     isMyTurn = true;
     updatePlayerCards();
     startTimer(Board.getCurrentPlayer());
