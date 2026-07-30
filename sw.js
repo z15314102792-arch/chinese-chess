@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chinese-chess-v1';
+const CACHE_NAME = 'chinese-chess-v2';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -26,9 +26,17 @@ self.addEventListener('activate', event => {
   );
 });
 
+// ★ 网络优先（确保始终拿到最新代码）
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('peerjs') || event.request.url.includes('unpkg')) return;
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        // 更新缓存
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
