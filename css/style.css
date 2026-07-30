@@ -253,44 +253,45 @@ body.bg-orbs {
   animation: orbDrift 12s ease-in-out infinite;
 }
 
-/* ==== 4. 几何星芒 —— conic-gradient + rotate ==== */
-@keyframes starburstSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-body.bg-spin { background: none; }
-body.bg-spin::before {
-  content: ''; position: fixed; inset: -20%; z-index: -1;
+/* ==== 4. 几何星芒 —— 大型放射纹滑动 ==== */
+@keyframes starburstSlide { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+body.bg-spin {
   background-color: #18181a;
-  background-image: repeating-conic-gradient(from 0deg,
-    #222226 0deg 4deg, #2a2a2e 4deg 5deg,
-    #222226 5deg 18deg, #2a2a2e 18deg 19deg,
-    #222226 19deg 30deg);
-  animation: starburstSpin 30s linear infinite;
+  background-image:
+    repeating-linear-gradient(30deg,
+      transparent, transparent 40px,
+      rgba(255,255,255,0.04) 40px, rgba(255,255,255,0.04) 42px),
+    repeating-linear-gradient(120deg,
+      transparent, transparent 40px,
+      rgba(255,255,255,0.04) 40px, rgba(255,255,255,0.04) 42px),
+    repeating-linear-gradient(0deg,
+      transparent, transparent 80px,
+      rgba(255,255,255,0.03) 80px, rgba(255,255,255,0.03) 82px);
+  background-size: 300% 300%;
+  animation: starburstSlide 20s linear infinite;
 }
 
-/* ==== 5. 呼吸脉冲 —— radial-gradient + scale + opacity 同步 ==== */
+/* ==== 5. 呼吸脉冲 —— radial-gradient + background-size 缩放 ==== */
 @keyframes breathePulse {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50%      { opacity: 0.90; transform: scale(1.3); }
+  0%, 100% { background-size: 120% 120%; background-position: center; }
+  50%      { background-size: 170% 170%; background-position: center; }
 }
-body.bg-breath { background: none; }
-body.bg-breath::before {
-  content: ''; position: fixed; inset: 0; z-index: -1;
+body.bg-breath {
   background-color: #0c041c;
   background-image: radial-gradient(ellipse at center, #5a28b8 0%, #1e0850 50%, #0c041c 100%);
+  background-size: 120% 120%;
+  background-position: center;
   animation: breathePulse 5s ease-in-out infinite;
 }
 
 /* ==== 6. 扫描光束 —— linear-gradient 光束横扫 ==== */
-@keyframes scanBeam { 0% { left: -120%; } 100% { left: 200%; } }
-body.bg-scan { background: none; }
-body.bg-scan::before {
-  content: ''; position: fixed; top: 0; left: -120%; width: 60%; height: 100%; z-index: -1;
+@keyframes scanBeam { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
+body.bg-scan {
   background-color: #030d18;
   background-image: linear-gradient(to right,
-    transparent 0%,
-    rgba(0,200,220,0.06) 40%,
-    rgba(0,200,220,0.40) 50%,
-    rgba(0,200,220,0.06) 60%,
-    transparent 100%);
+    transparent 42%, rgba(0,200,220,0.35) 48%,
+    rgba(0,200,220,0.35) 52%, transparent 58%);
+  background-size: 200% 100%;
   animation: scanBeam 5s linear infinite;
 }
 
@@ -425,12 +426,10 @@ body.bg-nebula {
 
 /* ==== 15. 冰霜结晶 —— 冰蓝白闪烁粒子 ==== */
 @keyframes frostGlow {
-  0%, 100% { opacity: 0.35; }
-  50%      { opacity: 0.75; }
+  0%, 100% { background-size: 100% 100%; }
+  50%      { background-size: 108% 108%; }
 }
-body.bg-frost { background: none; }
-body.bg-frost::before {
-  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+body.bg-frost {
   background-color: #0a101c;
   background-image:
     radial-gradient(3px 3px at 15% 30%, rgba(180,220,255,0.80), transparent),
@@ -446,11 +445,9 @@ body.bg-frost::before {
   animation: frostGlow 4s ease-in-out infinite;
 }
 
-/* ==== 16. 极夜星空 —— 密集星场 + 缓慢旋转 ==== */
-@keyframes starfieldRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-body.bg-stars { background: none; }
-body.bg-stars::before {
-  content: ''; position: fixed; inset: -10%; z-index: -1;
+/* ==== 16. 极夜星空 —— 密集星场缓慢漂移 ==== */
+@keyframes starDrift { 0% { background-position: 0% 0%; } 100% { background-position: 3% 5%; } }
+body.bg-stars {
   background-color: #040410;
   background-image:
     radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.90), transparent),
@@ -467,40 +464,37 @@ body.bg-stars::before {
     radial-gradient(1px 1px at 58% 12%, rgba(210,220,255,0.35), transparent),
     radial-gradient(2px 2px at 18% 88%, rgba(255,255,255,0.70), transparent),
     radial-gradient(1.5px 1.5px at 75% 75%, rgba(210,220,255,0.50), transparent);
-  animation: starfieldRotate 180s linear infinite;
+  background-size: 120% 120%;
+  animation: starDrift 60s linear infinite alternate;
 }
 
-/* ==== 17. 雷电脉冲 —— 不定时电光闪烁 ==== */
-@keyframes voltFlash {
-  0%, 92%, 94%, 100% { opacity: 0; }
-  93% { opacity: 0.55; }
+/* ==== 17. 雷电脉冲 —— 双光斑交替闪现 ==== */
+@keyframes voltFlash1 {
+  0%, 90%, 93%, 100% { background-size: 150% 150%, 100% 100%; }
+  91% { background-size: 200% 200%, 100% 100%; }
 }
-body.bg-volt { background: none; }
-body.bg-volt::before {
-  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+@keyframes voltFlash2 {
+  0%, 88%, 91%, 100% { background-size: 100% 100%; }
+  89% { background-size: 100% 100%; }
+  90% { background-size: 200% 200%; }
+}
+body.bg-volt {
   background-color: #0a0a18;
-  background-image: radial-gradient(ellipse at 40% 50%,
-    rgba(100,200,255,0.70) 0%, rgba(60,160,240,0.30) 30%, transparent 60%);
-  animation: voltFlash 6s ease-in-out infinite;
-}
-body.bg-volt::after {
-  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(ellipse at 65% 45%,
-    rgba(80,180,240,0.60) 0%, transparent 55%);
-  animation: voltFlash 6s ease-in-out 2.5s infinite;
+  background-image:
+    radial-gradient(ellipse at 40% 50%, rgba(100,200,255,0.55) 0%, rgba(60,160,240,0.20) 30%, transparent 60%),
+    radial-gradient(ellipse at 65% 45%, rgba(80,180,240,0.45) 0%, transparent 55%);
+  background-size: 150% 150%, 100% 100%;
+  animation: voltFlash1 5s ease-in-out infinite, voltFlash2 5s ease-in-out 2s infinite;
 }
 
-/* ==== 18. 晨曦微光 —— 暖白呼吸 + 轻微色温变化 ==== */
+/* ==== 18. 晨曦微光 —— 暖白呼吸 + 色温变化 ==== */
 @keyframes dawnBreath {
-  0%, 100% { background-position: 40% 50%; opacity: 0.55; }
-  50%      { background-position: 60% 50%; opacity: 1.0; }
+  0%, 100% { background-size: 160% 160%; background-position: 45% 45%; }
+  50%      { background-size: 200% 200%; background-position: 55% 55%; }
 }
-body.bg-light { background: none; }
-body.bg-light::before {
-  content: ''; position: fixed; inset: 0; z-index: -1;
+body.bg-light {
   background-color: #e8e4de;
   background-image: radial-gradient(ellipse at 50% 50%, #fef8f2 0%, #e8e4de 40%, #d8d0c8 100%);
-  background-size: 180% 180%;
   animation: dawnBreath 6s ease-in-out infinite;
 }
 
@@ -534,8 +528,9 @@ body.bg-none::before, body.bg-none::after { display: none; }
 }
 .bg-preview.bg-spin {
   background-color: #18181a;
-  background-image: repeating-conic-gradient(from 0deg,
-    #222226 0deg 8deg, #2a2a2e 8deg 10deg, #222226 10deg 30deg);
+  background-image:
+    repeating-linear-gradient(30deg, transparent, transparent 15px, rgba(255,255,255,0.06) 15px, rgba(255,255,255,0.06) 16px),
+    repeating-linear-gradient(120deg, transparent, transparent 15px, rgba(255,255,255,0.06) 15px, rgba(255,255,255,0.06) 16px);
 }
 .bg-preview.bg-breath {
   background-color: #0c041c;
@@ -620,8 +615,8 @@ body.bg-none::before, body.bg-none::after { display: none; }
 @media (max-width: 768px) {
   body.bg-stripes, body.bg-ripple { animation-duration: 12s; }
   body.bg-orbs { animation-duration: 18s; }
-  body.bg-spin::before { animation-duration: 50s; }
-  body.bg-scan::before { animation-duration: 8s; }
+  body.bg-spin { animation-duration: 50s; }
+  body.bg-scan { animation-duration: 8s; }
   body.bg-rain { animation-duration: 10s; }
 }
 
