@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chinese-chess-v3';
+const CACHE_NAME = 'chinese-chess-v4';
 const FILES_TO_CACHE = [
   './',
   './index.html',

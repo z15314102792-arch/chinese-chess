@@ -17,7 +17,7 @@
   <div id="menu-screen" class="screen active">
     <div class="menu-container">
       <h1 class="title">中国象棋</h1>
-      <p class="subtitle">经典策略棋类游戏 · v1.3</p>
+      <p class="subtitle">经典策略棋类游戏 · v2.0</p>
       <div class="menu-buttons">
         <button id="btn-local" class="btn btn-primary">
           <span class="btn-icon">👥</span><span>本地双人</span>
@@ -102,7 +102,7 @@
         <h3>加入房间</h3>
         <p class="online-desc">输入好友分享的房间号加入对战</p>
         <div class="join-form">
-          <input type="text" id="input-room-id" placeholder="输入房间号" maxlength="20">
+          <input type="text" id="input-room-id" placeholder="输入6位房间号" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
           <button id="btn-paste-room" class="btn btn-small btn-accent" title="粘贴">📋</button>
           <button id="btn-join-room" class="btn btn-accent" style="width:auto">加入</button>
         </div>
@@ -136,7 +136,7 @@
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
   <script src="js/board.js"></script>
   <script src="js/ai.js"></script>
   <script src="js/p2p.js"></script>
