@@ -105,7 +105,7 @@ const UI = (() => {
 
   /** 背景主题 */
   const BG_THEMES = [
-    { id: 'bg-none',     name: '纯色深邃',    emoji: '🌑', cls: '', dynamic: false },
+    { id: 'bg-none',     name: '暗夜微动',    emoji: '🌑', cls: 'bg-none', dynamic: true },
     { id: 'bg-stripes',  name: '流金条纹',    emoji: '📐', cls: 'bg-stripes', dynamic: true },
     { id: 'bg-ripple',   name: '涟漪扩散',    emoji: '🫧', cls: 'bg-ripple', dynamic: true },
     { id: 'bg-orbs',     name: '浮光掠影',    emoji: '🔮', cls: 'bg-orbs', dynamic: true },
@@ -125,6 +125,10 @@ const UI = (() => {
     { id: 'bg-volt',     name: '雷电脉冲',    emoji: '⚡', cls: 'bg-volt', dynamic: true },
     { id: 'bg-light',    name: '晨曦微光',    emoji: '🤍', cls: 'bg-light', dynamic: true },
     { id: 'bg-particle', name: '禅意粒子',    emoji: '🧘', cls: 'bg-particle', dynamic: true },
+    { id: 'bg-sand',     name: '暖沙流金',    emoji: '🏜️', cls: 'bg-sand', dynamic: true },
+    { id: 'bg-sky',      name: '晴空流云',    emoji: '☁️', cls: 'bg-sky', dynamic: true },
+    { id: 'bg-mint',     name: '薄荷清风',    emoji: '🍃', cls: 'bg-mint', dynamic: true },
+    { id: 'bg-dusk',     name: '暮光淡紫',    emoji: '🌆', cls: 'bg-dusk', dynamic: true },
   ];
 
   let currentBoardTheme = BOARD_THEMES[0];

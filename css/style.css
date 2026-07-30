@@ -46,6 +46,12 @@ html, body {
 .btn-icon-only { background: rgba(0,0,0,0.40); border: 1px solid rgba(255,255,255,0.20); color: #f0f0f0; font-size: 1.3rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; transition: background 0.15s, opacity 0.15s, color 0.15s; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .btn-icon-only:active { background: rgba(0,0,0,0.60); color: #fff; border-color: rgba(255,255,255,0.35); }
 .btn-icon-only:disabled { opacity: 0.30; cursor: default; background: rgba(0,0,0,0.20); }
+#btn-undo { background: rgba(200,160,80,0.30); border-color: rgba(220,180,100,0.40); color: #f5d080; }
+#btn-undo:active { background: rgba(200,160,80,0.50); }
+#btn-undo:disabled { background: rgba(200,160,80,0.10); border-color: rgba(220,180,100,0.15); color: rgba(245,200,120,0.30); }
+#btn-restart { background: rgba(100,160,200,0.30); border-color: rgba(120,180,220,0.40); color: #a0d8f0; }
+#btn-restart:active { background: rgba(100,160,200,0.50); }
+#btn-restart:disabled { background: rgba(100,160,200,0.10); border-color: rgba(120,180,220,0.15); color: rgba(160,210,240,0.30); }
 
 /* ===== 游戏界面头部 ===== */
 .game-header {
@@ -77,8 +83,8 @@ html, body {
 .black-avatar { background: radial-gradient(circle at 35% 35%, #555, #111); }
 
 .player-meta { display: flex; flex-direction: column; min-width: 0; }
-.player-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-timer { font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.player-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+.player-timer { font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
 
 /* 计时器警告闪烁 */
 @keyframes timerFlash {
@@ -94,7 +100,7 @@ html, body {
   flex-shrink: 0; text-align: center; padding: 4px 8px;
 }
 .move-badge span {
-  font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+  font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* 右侧操作按钮组 */
@@ -102,7 +108,7 @@ html, body {
 
 /* 游戏底部 */
 .game-footer { width: 100%; max-width: 500px; text-align: center; padding: 2px 8px 8px; min-height: 22px; }
-#game-hint { font-size: 0.78rem; color: var(--text-muted); }
+#game-hint { font-size: 0.78rem; color: var(--text-muted); text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 
 /* 将军横幅 */
 .check-banner {
@@ -487,15 +493,18 @@ body.bg-volt {
   animation: voltFlash1 5s ease-in-out infinite, voltFlash2 5s ease-in-out 2s infinite;
 }
 
-/* ==== 18. 晨曦微光 —— 暖白呼吸 + 色温变化 ==== */
+/* ==== 18. 晨曦微光 —— 暖杏色呼吸 + 光晕飘移 ==== */
 @keyframes dawnBreath {
-  0%, 100% { background-size: 160% 160%; background-position: 45% 45%; }
-  50%      { background-size: 200% 200%; background-position: 55% 55%; }
+  0%, 100% { background-size: 160% 160%; background-position: 40% 45%; }
+  50%      { background-size: 210% 210%; background-position: 60% 55%; }
 }
 body.bg-light {
-  background-color: #e8e4de;
-  background-image: radial-gradient(ellipse at 50% 50%, #fef8f2 0%, #e8e4de 40%, #d8d0c8 100%);
-  animation: dawnBreath 6s ease-in-out infinite;
+  background-color: #d8cec0;
+  background-image:
+    radial-gradient(ellipse at 40% 40%, rgba(255,245,230,0.65) 0%, transparent 55%),
+    radial-gradient(ellipse at 65% 60%, rgba(240,225,200,0.45) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(250,240,220,0.50) 0%, #d8cec0 60%);
+  animation: dawnBreath 7s ease-in-out infinite;
 }
 
 /* ==== 19. 禅意粒子 —— Canvas 驱动，Particles.js ==== */
@@ -504,9 +513,74 @@ body.bg-particle {
   background-image: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(120,80,40,0.10) 0%, transparent 60%);
 }
 
-/* ==== 20. 纯色深邃（静态参考） ==== */
-body.bg-none { background: #1a1008; animation: none; }
-body.bg-none::before, body.bg-none::after { display: none; }
+/* ==== 20. 暖沙流金 —— 浅沙色 + 暖金光晕流动 ==== */
+@keyframes sandFlow {
+  0%, 100% { background-position: 40% 40%; }
+  50%      { background-position: 60% 60%; }
+}
+body.bg-sand {
+  background-color: #d8c8b0;
+  background-image:
+    radial-gradient(ellipse at 30% 35%, rgba(255,240,210,0.60) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 65%, rgba(240,220,180,0.45) 0%, transparent 50%);
+  background-size: 180% 180%;
+  animation: sandFlow 8s ease-in-out infinite;
+}
+
+/* ==== 21. 晴空流云 —— 浅蓝 + 白云飘移 ==== */
+@keyframes skyDrift {
+  0%   { background-position: 20% 40%, 80% 50%; }
+  100% { background-position: 30% 30%, 70% 60%; }
+}
+body.bg-sky {
+  background-color: #c8d8e8;
+  background-image:
+    radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.60) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 50%, rgba(240,245,255,0.50) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: skyDrift 10s ease-in-out infinite alternate;
+}
+
+/* ==== 22. 薄荷清风 —— 浅绿 + 柔光摇曳 ==== */
+@keyframes mintSway {
+  0%, 100% { background-position: 45% 45%, 55% 55%; }
+  50%      { background-position: 55% 40%, 45% 60%; }
+}
+body.bg-mint {
+  background-color: #c8dcc8;
+  background-image:
+    radial-gradient(ellipse at 40% 45%, rgba(240,255,240,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 55%, rgba(220,245,225,0.45) 0%, transparent 50%);
+  background-size: 180% 180%;
+  animation: mintSway 9s ease-in-out infinite;
+}
+
+/* ==== 23. 暮光淡紫 —— 浅紫灰 + 光晕呼吸 ==== */
+@keyframes duskGlow {
+  0%, 100% { background-size: 160% 160%; background-position: 50% 50%; }
+  50%      { background-size: 200% 200%; background-position: 48% 52%; }
+}
+body.bg-dusk {
+  background-color: #d0c8d8;
+  background-image:
+    radial-gradient(ellipse at 50% 50%, rgba(245,235,255,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 35% 60%, rgba(230,215,240,0.40) 0%, transparent 50%);
+  animation: duskGlow 8s ease-in-out infinite;
+}
+
+/* ==== 24. 暗夜微动 —— 极暗底色 + 微妙热噪 ==== */
+@keyframes darkShift {
+  0%, 100% { background-position: 50% 50%; }
+  50%      { background-position: 53% 48%; }
+}
+body.bg-none {
+  background-color: #120a06;
+  background-image:
+    radial-gradient(ellipse at 50% 50%, rgba(40,25,15,0.40) 0%, transparent 60%),
+    radial-gradient(ellipse at 30% 70%, rgba(30,18,10,0.25) 0%, transparent 50%);
+  background-size: 150% 150%;
+  animation: darkShift 12s ease-in-out infinite;
+}
 
 /* ==================== 预览卡片快照 ==================== */
 .bg-preview.bg-stripes {
@@ -602,14 +676,35 @@ body.bg-none::before, body.bg-none::after { display: none; }
   background-image: radial-gradient(ellipse at 45% 50%, rgba(100,200,255,0.60) 0%, transparent 55%);
 }
 .bg-preview.bg-light {
-  background-color: #e8e4de;
-  background-image: radial-gradient(ellipse at 50% 50%, #fef8f2 0%, #e8e4de 40%, #d8d0c8 100%);
+  background-color: #d8cec0;
+  background-image:
+    radial-gradient(ellipse at 40% 40%, rgba(255,245,230,0.7) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 55%, rgba(240,225,200,0.5) 0%, #d8cec0 55%);
 }
 .bg-preview.bg-particle {
   background-color: #0f0a06;
   background-image: radial-gradient(ellipse at 50% 40%, rgba(120,80,40,0.25) 0%, transparent 55%);
 }
-.bg-preview.bg-none { background: #1a1008; }
+.bg-preview.bg-none {
+  background-color: #120a06;
+  background-image: radial-gradient(ellipse at 50% 50%, rgba(40,25,15,0.45) 0%, transparent 55%);
+}
+.bg-preview.bg-sand {
+  background-color: #d8c8b0;
+  background-image: radial-gradient(ellipse at 30% 35%, rgba(255,240,210,0.65) 0%, transparent 50%);
+}
+.bg-preview.bg-sky {
+  background-color: #c8d8e8;
+  background-image: radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.65) 0%, transparent 52%);
+}
+.bg-preview.bg-mint {
+  background-color: #c8dcc8;
+  background-image: radial-gradient(ellipse at 40% 45%, rgba(240,255,240,0.60) 0%, transparent 52%);
+}
+.bg-preview.bg-dusk {
+  background-color: #d0c8d8;
+  background-image: radial-gradient(ellipse at 50% 50%, rgba(245,235,255,0.58) 0%, transparent 52%);
+}
 
 /* ==================== 移动端 & 无障碍 ==================== */
 @media (max-width: 768px) {
