@@ -334,22 +334,24 @@ const Main = (() => {
 
           if (Board.isCheckmate(Board.RED)) {
             gameOver = true;
+            aiThinking = false;
             stopTimer();
             updatePlayerCards();
             UI.setHint('将死！');
             setTimeout(() => UI.showWin(Board.BLACK, false), 800);
           } else if (Board.isStalemate(Board.RED)) {
             gameOver = true;
+            aiThinking = false;
             stopTimer();
             updatePlayerCards();
             UI.setHint('困毙！');
             setTimeout(() => UI.showWin(Board.BLACK, false), 800);
           } else {
+            aiThinking = false;
             updatePlayerCards();
             showCheckStatus();
           }
         }
-        aiThinking = false;
       }, thinkTime);
     }
 
@@ -463,20 +465,27 @@ const Main = (() => {
   // ==================== 联机 ====================
 
   function showOnlineScreen() {
-    UI.hideRoomInfo();
-    UI.showScreen('online');
-    UI.getElement('input-room-id').value = '';
-    UI.getElement('join-error').classList.add('hidden');
-    UI.getElement('btn-create-room').disabled = false;
-    UI.getElement('btn-create-room').textContent = '创建房间';
-    UI.getElement('btn-join-room').disabled = false;
-    UI.getElement('btn-join-room').textContent = '加入';
-    P2P.init({
-      onConnected: onP2PConnected,
-      onDisconnected: onP2PDisconnected,
-      onMove: onP2PMove,
-      onError: onP2PError,
-    });
+    console.log('[Main] 进入联机界面');
+    try {
+      UI.hideRoomInfo();
+      UI.showScreen('online');
+      UI.getElement('input-room-id').value = '';
+      UI.getElement('join-error').classList.add('hidden');
+      UI.getElement('btn-create-room').disabled = false;
+      UI.getElement('btn-create-room').textContent = '创建房间';
+      UI.getElement('btn-join-room').disabled = false;
+      UI.getElement('btn-join-room').textContent = '加入';
+      P2P.init({
+        onConnected: onP2PConnected,
+        onDisconnected: onP2PDisconnected,
+        onMove: onP2PMove,
+        onError: onP2PError,
+      });
+      console.log('[Main] 联机界面初始化完成');
+    } catch(e) {
+      console.error('[Main] 联机界面初始化失败:', e);
+      UI.showToast('联机界面加载失败: ' + e.message, 5000);
+    }
   }
 
   async function handleCreateRoom() {
