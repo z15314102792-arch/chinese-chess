@@ -163,13 +163,13 @@ const Main = (() => {
     aiThinking = false;
     pendingRequest = null;
     Board.reset();
-    UI.clearAll();
     UI.hideWin();
     UI.hideRequest();
     UI.setHint('');
     // ★ 先 showScreen 再 resizeCanvas（避免 display:none → clientWidth=0）
     UI.showScreen('game');
     UI.resizeCanvas();
+    UI.clearAll();
 
     // 红方先行
     if (currentMode === MODE.ONLINE) {

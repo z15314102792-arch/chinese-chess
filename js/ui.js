@@ -98,7 +98,7 @@ const UI = (() => {
   // ==================== Canvas 绘制 ====================
 
   function draw() {
-    if (!ctx || !canvas) return;
+    if (!ctx || !canvas || cellSize <= 0) return;
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -202,6 +202,7 @@ const UI = (() => {
 
   function drawPiece(x, y, piece, isFloating) {
     const px = padding + x * cellSize, py = padding + y * cellSize, r = cellSize * 0.44;
+    if (r <= 0) return;  // 防止 cellSize=0 时负半径
     const color = board.getColor(piece);
     const char = board.getChar(piece);
 
@@ -232,11 +233,13 @@ const UI = (() => {
     ctx.stroke();
 
     // 内圈
-    ctx.beginPath();
-    ctx.arc(px, py, r - 4, 0, Math.PI * 2);
-    ctx.strokeStyle = color === board.RED ? '#c0392b' : '#333';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    if (r > 6) {
+      ctx.beginPath();
+      ctx.arc(px, py, r - 4, 0, Math.PI * 2);
+      ctx.strokeStyle = color === board.RED ? '#c0392b' : '#333';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
     // 汉字
     ctx.fillStyle = color === board.RED ? '#c0392b' : '#1a1a1a';
