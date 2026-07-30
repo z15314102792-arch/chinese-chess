@@ -43,9 +43,9 @@ html, body {
 .btn-secondary { background: linear-gradient(135deg, var(--secondary), #3b2d6e); box-shadow: 0 4px 15px rgba(83, 52, 131, 0.4); }
 .btn-accent { background: linear-gradient(135deg, #8b4513, #5c2e0a); box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4); }
 .btn-small { padding: 8px 16px; font-size: 0.9rem; border-radius: 10px; min-height: 40px; width: auto; }
-.btn-icon-only { background: none; border: none; color: var(--text); font-size: 1.3rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; transition: background 0.15s, opacity 0.15s; flex-shrink: 0; }
-.btn-icon-only:active { background: rgba(255,255,255,0.1); }
-.btn-icon-only:disabled { opacity: 0.3; cursor: default; }
+.btn-icon-only { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ddd; font-size: 1.3rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; transition: background 0.15s, opacity 0.15s, color 0.15s; flex-shrink: 0; }
+.btn-icon-only:active { background: rgba(255,255,255,0.18); color: #fff; }
+.btn-icon-only:disabled { opacity: 0.25; cursor: default; background: rgba(255,255,255,0.04); }
 
 /* ===== 游戏界面头部 ===== */
 .game-header {
@@ -206,6 +206,7 @@ html, body {
   width: 100%; aspect-ratio: 3/2;
   border-radius: 8px; display: block; margin-bottom: 8px;
   position: relative; overflow: hidden;
+  background-color: #1a1008; /* 默认底色 */
 }
 
 /* ===== 动态背景（body class 控制，无 !important） ===== */

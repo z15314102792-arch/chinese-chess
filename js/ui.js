@@ -695,6 +695,21 @@ const UI = (() => {
         bgGrid.appendChild(card);
       });
     }
+
+    // 绑定 Tab 切换（防止内联 onclick 失效）
+    const themeTabs = elements['theme-tabs'];
+    if (themeTabs) {
+      themeTabs.querySelectorAll('.rules-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabName = this.dataset.tab;
+          themeTabs.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', t === this));
+          const bGrid = elements['theme-grid-board'];
+          const gGrid = elements['theme-grid-bg'];
+          if (bGrid) bGrid.classList.toggle('active', tabName === 'board');
+          if (gGrid) gGrid.classList.toggle('active', tabName === 'bg');
+        });
+      });
+    }
   }
 
   function createBoardCard(theme, grid) {
