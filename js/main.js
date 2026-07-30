@@ -274,7 +274,7 @@ const Main = (() => {
 
     if (!Board.movePiece(fx, fy, tx, ty)) return false;
 
-    UI.setLastMove(fx, fy, tx, ty);
+    UI.startMoveAnimation(fx, fy, tx, ty, Board.get(tx, ty));
     UI.setMoveCount(Board.getMoveCount());
 
     // 检查将军喊将
@@ -321,7 +321,7 @@ const Main = (() => {
         const move = AI.getMove(Board, currentMode === MODE.AI_EASY ? 'easy' : 'medium');
         if (move) {
           Board.movePiece(move.fx, move.fy, move.tx, move.ty);
-          UI.setLastMove(move.fx, move.fy, move.tx, move.ty);
+          UI.startMoveAnimation(move.fx, move.fy, move.tx, move.ty, Board.get(move.tx, move.ty));
           UI.setMoveCount(Board.getMoveCount());
           Board.switchPlayer();
 
@@ -612,7 +612,7 @@ const Main = (() => {
     if (gameOver || typeof fx !== 'number') return;
     if (!Board.movePiece(fx, fy, tx, ty)) return;
 
-    UI.setLastMove(fx, fy, tx, ty);
+    UI.startMoveAnimation(fx, fy, tx, ty, Board.get(tx, ty));
     UI.setMoveCount(Board.getMoveCount());
     Board.switchPlayer();
 

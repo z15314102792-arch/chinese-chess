@@ -22,6 +22,13 @@ const UI = (() => {
   let checkKingPos = null;      // {x, y} 被将军的帅/将位置
   let checkFlash = 0;           // 将军闪烁计数器
 
+  // 移动动画
+  let animPiece = null;         // 正在动画的棋子编码
+  let animFromX = 0, animFromY = 0;
+  let animToX = 0, animToY = 0;
+  let animStart = 0;
+  const ANIM_DURATION = 220;    // 毫秒
+
   /** 初始化 */
   function init(boardModule) {
     board = boardModule;
@@ -153,10 +160,25 @@ const UI = (() => {
     for (let y = 0; y < board.ROWS; y++) {
       for (let x = 0; x < board.COLS; x++) {
         const piece = board.get(x, y);
-        if (piece !== board.EMPTY) {
-          drawPiece(x, y, piece, false);
-        }
+        if (piece === board.EMPTY) continue;
+        // 动画中的棋子：跳过原位和目标位，画在插值位置
+        if (animPiece && (
+          (x === animFromX && y === animFromY) ||
+          (x === animToX && y === animToY && board.get(animToX, animToY) === animPiece)
+        )) continue;
+        drawPiece(x, y, piece, false);
       }
+    }
+
+    // 动画棋子画在插值位置
+    if (animPiece) {
+      const elapsed = performance.now() - animStart;
+      const t = Math.min(elapsed / ANIM_DURATION, 1);
+      // ease-out: 1 - (1-t)^2
+      const ease = 1 - (1 - t) * (1 - t);
+      const ax = animFromX + (animToX - animFromX) * ease;
+      const ay = animFromY + (animToY - animFromY) * ease;
+      drawPieceAt(ax, ay, animPiece, false);
     }
 
     // 合法走法提示
@@ -174,33 +196,26 @@ const UI = (() => {
       }
     }
 
-    // 选中高亮
+    // ★ 选中高亮（绿色光晕 + 轻微放大效果）
     if (selectedPos) {
       const sx = p + selectedPos.x * s, sy = p + selectedPos.y * s;
-      ctx.strokeStyle = 'rgba(255,215,0,0.75)';
-      ctx.lineWidth = 3;
+      // 绿色光晕外圈
+      ctx.strokeStyle = 'rgba(0,200,80,0.7)';
+      ctx.lineWidth = 3.5;
       ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
-      // 外发光
-      ctx.strokeStyle = 'rgba(255,215,0,0.35)';
-      ctx.lineWidth = 6;
+      // 外层柔光
+      ctx.strokeStyle = 'rgba(0,200,80,0.3)';
+      ctx.lineWidth = 7;
       ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // ★ 最后一步标记（起止点明显区分）
+    // ★ 最后一步标记（淡蓝色半透明方块，国际象棋标准做法）
     if (lastFrom && lastTo) {
-      // 起点 — 橙色空心环
-      const fx = p + lastFrom.x * s, fy = p + lastFrom.y * s;
-      ctx.strokeStyle = 'rgba(255,165,0,0.85)';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(fx, fy, s * 0.28, 0, Math.PI * 2); ctx.stroke();
-
-      // 终点 — 红色半透明实心圆
-      const tx = p + lastTo.x * s, ty = p + lastTo.y * s;
-      ctx.fillStyle = 'rgba(233,68,96,0.45)';
-      ctx.beginPath(); ctx.arc(tx, ty, s * 0.25, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(233,68,96,0.7)';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(tx, ty, s * 0.28, 0, Math.PI * 2); ctx.stroke();
+      [lastFrom, lastTo].forEach(pos => {
+        const bx = p + pos.x * s - s * 0.42, by = p + pos.y * s - s * 0.42;
+        ctx.fillStyle = 'rgba(100,180,255,0.35)';
+        ctx.fillRect(bx, by, s * 0.84, s * 0.84);
+      });
     }
 
     // ★ 将军高亮 —— 被将的帅/将红色脉冲
@@ -225,55 +240,31 @@ const UI = (() => {
     ctx.beginPath(); ctx.moveTo(x + 2 * s, y); ctx.lineTo(x, y + 2 * s); ctx.stroke();
   }
 
-  function drawPiece(x, y, piece, isFloating) {
-    const px = padding + x * cellSize, py = padding + y * cellSize, r = cellSize * 0.44;
-    if (r <= 0) return;  // 防止 cellSize=0 时负半径
+  function drawPieceAt(px, py, piece, isFloating) {
+    const r = cellSize * 0.44;
+    if (r <= 0) return;
     const color = board.getColor(piece);
     const char = board.getChar(piece);
-
     ctx.save();
-    if (isFloating) {
-      ctx.globalAlpha = 0.6;
-    }
-
-    // 阴影
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-
-    // 底色
-    ctx.beginPath();
-    ctx.arc(px, py, r, 0, Math.PI * 2);
-    ctx.fillStyle = '#f5deb3';
-    ctx.fill();
-
-    // 外圈
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = color === board.RED ? '#b03030' : '#1a1a1a';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    // 内圈
+    if (isFloating) ctx.globalAlpha = 0.6;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 3; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
+    ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fillStyle = '#f5deb3'; ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = color === board.RED ? '#b03030' : '#1a1a1a'; ctx.lineWidth = 2.5; ctx.stroke();
     if (r > 6) {
-      ctx.beginPath();
-      ctx.arc(px, py, r - 4, 0, Math.PI * 2);
-      ctx.strokeStyle = color === board.RED ? '#c0392b' : '#333';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      ctx.beginPath(); ctx.arc(px, py, r - 4, 0, Math.PI * 2);
+      ctx.strokeStyle = color === board.RED ? '#c0392b' : '#333'; ctx.lineWidth = 1.5; ctx.stroke();
     }
-
-    // 汉字
     ctx.fillStyle = color === board.RED ? '#c0392b' : '#1a1a1a';
     ctx.font = `bold ${r * 1.15}px "KaiTi", "STKaiti", "楷体", "SimSun", serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(char, px, py + 1);
-
     ctx.restore();
+  }
+
+  function drawPiece(x, y, piece, isFloating) {
+    const px = padding + x * cellSize, py = padding + y * cellSize;
+    drawPieceAt(px, py, piece, isFloating);
   }
 
   // ==================== 交互处理 ====================
@@ -346,10 +337,39 @@ const UI = (() => {
 
   // ==================== 高亮与标记 ====================
 
+  // ==================== 移动动画 ====================
+
+  let animRAF = null;
+
+  function startMoveAnimation(fx, fy, tx, ty, piece) {
+    animPiece = piece;
+    animFromX = fx; animFromY = fy;
+    animToX = tx; animToY = ty;
+    animStart = performance.now();
+
+    // 标记已经落子（动画期间显示在中间位置）
+    lastFrom = { x: fx, y: fy };
+    lastTo = { x: tx, y: ty };
+
+    function animLoop(now) {
+      const elapsed = now - animStart;
+      if (elapsed >= ANIM_DURATION) {
+        animPiece = null;
+        animRAF = null;
+        draw();
+        return;
+      }
+      draw();
+      animRAF = requestAnimationFrame(animLoop);
+    }
+    if (animRAF) cancelAnimationFrame(animRAF);
+    animRAF = requestAnimationFrame(animLoop);
+  }
+
   function setLastMove(fx, fy, tx, ty) {
     lastFrom = { x: fx, y: fy };
     lastTo = { x: tx, y: ty };
-    draw();
+    if (!animPiece) draw();
   }
 
   function clearLastMove() {
@@ -473,6 +493,7 @@ const UI = (() => {
   return {
     init, draw, showScreen, resizeCanvas,
     selectPiece, clearSelection, setLastMove, clearLastMove, clearAll,
+    startMoveAnimation,
     setCheckHighlight, clearCheckHighlight,
     setPlayerCards, updateTimerDisplay, setTimerUrgent,
     setMoveCount, setHint,

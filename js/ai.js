@@ -1,20 +1,25 @@
 /**
  * 中国象棋 AI 引擎
  *
- * 简单模式：2层Minimax + 随机噪声（≈五子棋简单）
- * 中等模式：3层Alpha-Beta + 走法排序 + 位置评估（≈五子棋中等）
+ * 简单模式：2层Minimax + 大量随机性（模拟初学者）
+ * 中等模式：3层Alpha-Beta + 位置评估 + 适度随机（模拟业余棋手）
+ *
+ * 设计原则：
+ *  - 不过度追求子力优势，重视局面平衡
+ *  - 加入随机性避免模板化走棋
+ *  - 两个难度有明显棋力差距
  */
 const AI = (() => {
   const PIECE_VALUE = {
     0: 10000,  // 帥/將
-    4: 600,    // 車
-    3: 300,    // 馬
-    5: 300,    // 砲/炮
-    2: 120,    // 相/象
-    1: 120,    // 仕/士
-    6: 55,     // 兵/卒(未过河)
+    4: 500,    // 車（降权，减少激进兑子）
+    3: 280,    // 馬
+    5: 280,    // 砲/炮
+    2: 110,    // 相/象
+    1: 110,    // 仕/士
+    6: 50,     // 兵/卒(未过河)
   };
-  const PAWN_CROSSED = 130;
+  const PAWN_CROSSED = 120;
 
   function getValue(piece, y) {
     const type = Board.getType(piece);
@@ -25,31 +30,23 @@ const AI = (() => {
     return PIECE_VALUE[Board.PAWN];
   }
 
-  // 位置价值加成
+  // 位置价值
   function posBonus(piece, x, y) {
     const type = Board.getType(piece);
     const color = Board.getColor(piece);
     let b = 0;
-
-    // 中路控制
     if (x >= 3 && x <= 5) b += 2;
-
-    // 大子过河奖励
-    if (type === Board.ROOK || type === Board.HORSE || type === Board.CANNON) {
-      const crossed = (color === Board.RED && y <= 4) || (color === Board.BLACK && y >= 5);
-      if (crossed) b += 10;
-    }
-
-    // 兵过河中路加分
-    if (type === Board.PAWN) {
-      const crossed = (color === Board.RED && y <= 4) || (color === Board.BLACK && y >= 5);
-      if (crossed && x >= 3 && x <= 5) b += 6;
-    }
-
-    // 帅在中间更安全
-    if (type === Board.KING && x === 4) b += 5;
-
+    const crossed = (color === Board.RED && y <= 4) || (color === Board.BLACK && y >= 5);
+    if ((type === Board.ROOK || type === Board.HORSE || type === Board.CANNON) && crossed) b += 8;
+    if (type === Board.PAWN && crossed && x >= 3 && x <= 5) b += 5;
+    if (type === Board.KING) b += (x === 4 ? 5 : 0) + (color === Board.RED ? (9 - y) : y) * 0.5;
     return b;
+  }
+
+  // 移动性奖励
+  function mobilityBonus(board, color) {
+    const moves = board.getAllLegalMoves(color);
+    return Math.min(moves.length * 2, 60);
   }
 
   function evaluate(board, aiColor) {
@@ -63,28 +60,29 @@ const AI = (() => {
         score += (color === aiColor) ? val : -val;
       }
     }
+    // 移动性加分（鼓励活跃，减少龟缩）
+    score += mobilityBonus(board, aiColor) * 0.5;
+    const opponent = aiColor === Board.RED ? Board.BLACK : Board.RED;
+    score -= mobilityBonus(board, opponent) * 0.3;
     return score;
   }
 
   function sortMoves(moves, board) {
     return moves.sort((a, b) => {
       const ca = board.get(a.tx, a.ty), cb = board.get(b.tx, b.ty);
-      const va = ca !== Board.EMPTY ? getValue(ca, a.ty) : 0;
-      const vb = cb !== Board.EMPTY ? getValue(cb, b.ty) : 0;
-      return vb - va;
+      return (cb !== Board.EMPTY ? getValue(cb, b.ty) : 0) - (ca !== Board.EMPTY ? getValue(ca, a.ty) : 0);
     });
   }
 
-  // ==================== 简单模式：2层Minimax + 噪声 ====================
+  // ==================== 简单模式 ====================
 
   function easyMove(board) {
     const aiColor = board.getCurrentPlayer();
     const allMoves = board.getAllLegalMoves(aiColor);
     if (allMoves.length === 0) return null;
 
-    let bestScore = -Infinity;
-    let bestMoves = [];
-
+    // 对每个走法打分（2层Minimax）
+    const scored = [];
     for (const m of allMoves) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
@@ -93,34 +91,36 @@ const AI = (() => {
       // 对手最佳回应
       const oppMoves = board.getAllLegalMoves(board.getCurrentPlayer());
       let oppBest = -Infinity;
-      for (const om of oppMoves.slice(0, 20)) {
+      const sampleN = Math.min(oppMoves.length, 15);
+      for (let i = 0; i < sampleN; i++) {
+        const om = oppMoves[Math.floor(Math.random() * oppMoves.length)];
         const s2 = board.getState();
         board.movePiece(om.fx, om.fy, om.tx, om.ty);
         oppBest = Math.max(oppBest, evaluate(board, aiColor));
         board.loadState(s2);
       }
-      if (oppMoves.length === 0) oppBest = -99999; // 将死对方
+      if (oppMoves.length === 0) oppBest = -99999;
 
       const netScore = evaluate(board, aiColor) - oppBest * 0.6;
-
-      // 简单AI加随机噪声（±20），增加变化
-      const finalScore = netScore + (Math.random() - 0.5) * 40;
-
       board.loadState(saved);
-
-      if (finalScore > bestScore) {
-        bestScore = finalScore;
-        bestMoves = [m];
-      } else if (Math.abs(finalScore - bestScore) < 8) {
-        bestMoves.push(m);
-      }
+      scored.push({ move: m, score: netScore });
     }
 
-    const topN = bestMoves.slice(0, Math.max(3, Math.ceil(bestMoves.length * 0.3)));
-    return topN[Math.floor(Math.random() * topN.length)];
+    // ★ 简单AI：从Top-40%中随机选（大幅增加变化性）
+    scored.sort((a, b) => b.score - a.score);
+    const topCount = Math.max(3, Math.ceil(scored.length * 0.4));
+    const pool = scored.slice(0, topCount);
+    // 加权随机：分高的概率更大，但不绝对
+    const totalWeight = pool.reduce((s, m, i) => s + (pool.length - i), 0);
+    let r = Math.random() * totalWeight;
+    for (let i = 0; i < pool.length; i++) {
+      r -= (pool.length - i);
+      if (r <= 0) return pool[i].move;
+    }
+    return pool[pool.length - 1].move;
   }
 
-  // ==================== 中等模式：3层Alpha-Beta ====================
+  // ==================== 中等模式 ====================
 
   function mediumMove(board) {
     const aiColor = board.getCurrentPlayer();
@@ -130,26 +130,30 @@ const AI = (() => {
     sortMoves(allMoves, board);
     const candidates = allMoves.slice(0, 35);
 
-    let bestMove = candidates[0];
-    let bestScore = -Infinity;
-    const alpha = -Infinity, beta = Infinity;
-
+    // Alpha-Beta 深度3
+    const scored = [];
     for (const m of candidates) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
       board.switchPlayer();
-      const score = -negamax(board, 2, -beta, -alpha, aiColor);
+      const score = -negamax(board, 2, -Infinity, Infinity, aiColor);
       board.loadState(saved);
-
-      if (score > bestScore) { bestScore = score; bestMove = m; }
+      scored.push({ move: m, score });
     }
 
-    return bestMove;
+    scored.sort((a, b) => b.score - a.score);
+
+    // ★ 中等AI：从Top-25%随机选（有棋力但不模板化）
+    const topCount = Math.max(2, Math.ceil(scored.length * 0.25));
+    const pool = scored.slice(0, topCount);
+    // 加入少量随机噪声扰动排序
+    const noisy = pool.map((m, i) => ({ ...m, noise: m.score + (Math.random() - 0.5) * 15 }));
+    noisy.sort((a, b) => b.noise - a.noise);
+    return noisy[0].move;
   }
 
   function negamax(board, depth, alpha, beta, aiColor) {
     const currentColor = board.getCurrentPlayer();
-
     if (depth === 0) {
       return evaluate(board, aiColor) * (currentColor === aiColor ? 1 : -1);
     }
@@ -174,7 +178,6 @@ const AI = (() => {
       if (score > alpha) alpha = score;
       if (alpha >= beta) break;
     }
-
     return best;
   }
 
