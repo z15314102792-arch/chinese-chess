@@ -21,6 +21,7 @@ const UI = (() => {
   let lastTo = null;            // {x, y} 上一步终点
   let checkKingPos = null;      // {x, y} 被将军的帅/将位置
   let checkFlash = 0;           // 将军闪烁计数器
+  let checkIsDefender = true;   // 当前玩家是被将方还是进攻方
 
   // 移动动画
   let animPiece = null;         // 正在动画的棋子编码
@@ -227,19 +228,26 @@ const UI = (() => {
       });
     }
 
-    // ★ 将军高亮 —— 被将的帅/将红色脉冲
+    // ★ 将军高亮
     if (checkKingPos) {
       const kx = p + checkKingPos.x * s, ky = p + checkKingPos.y * s;
-      // 外圈脉冲光晕（相位随 checkFlash 变化）
       const phase = checkFlash * 0.1;
-      const alpha = 0.5 + 0.5 * Math.sin(phase);
-      ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.arc(kx, ky, s * 0.52, 0, Math.PI * 2); ctx.stroke();
-      // 第二圈更大光晕
-      ctx.strokeStyle = `rgba(255,50,50,${alpha * 0.6})`;
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(kx, ky, s * 0.58, 0, Math.PI * 2); ctx.stroke();
+      if (checkIsDefender) {
+        // 被将方：红色脉冲（危险警告）
+        const alpha = 0.4 + 0.6 * Math.abs(Math.sin(phase));
+        ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
+        ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.arc(kx, ky, s * 0.52, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,40,40,${alpha * 0.5})`;
+        ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.arc(kx, ky, s * 0.57, 0, Math.PI * 2); ctx.stroke();
+      } else {
+        // 进攻方：金色光环（宣告将军）
+        const alpha = 0.3 + 0.3 * Math.sin(phase);
+        ctx.strokeStyle = `rgba(255,200,40,${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(kx, ky, s * 0.50, 0, Math.PI * 2); ctx.stroke();
+      }
     }
   }
 
@@ -397,11 +405,11 @@ const UI = (() => {
 
   let checkFlashTimer = null;
 
-  function setCheckHighlight(color) {
+  function setCheckHighlight(color, isDefender) {
     checkKingPos = Board.findKing(color);
+    checkIsDefender = isDefender !== false;  // 默认为被将方
     checkFlash = 0;
     draw();
-    // 启动闪烁动画（每100ms更新）
     if (checkFlashTimer) clearInterval(checkFlashTimer);
     checkFlashTimer = setInterval(() => {
       checkFlash++;

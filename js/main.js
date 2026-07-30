@@ -227,7 +227,7 @@ const Main = (() => {
       // 当前走子方被将军
       banner.textContent = '⚠ 你被将军！必须应将';
       banner.className = 'check-banner defender';
-      UI.setCheckHighlight(current);
+      UI.setCheckHighlight(current, true);
       UI.setHint('');
 
       // 被将方卡片红框
@@ -239,7 +239,7 @@ const Main = (() => {
       if (Board.isInCheck(opponent)) {
         banner.textContent = '⚔ 将军！对方必须应将';
         banner.className = 'check-banner attacker';
-        UI.setCheckHighlight(opponent);
+        UI.setCheckHighlight(opponent, false);
         UI.setHint('');
         // 被将方卡片红框
         const cardId = opponent === Board.RED ? 'red-card' : 'black-card';

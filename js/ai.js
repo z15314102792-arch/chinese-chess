@@ -106,11 +106,25 @@ const AI = (() => {
       scored.push({ move: m, score: netScore });
     }
 
-    // ★ 简单AI：从Top-40%中随机选（大幅增加变化性）
+    // ★ 简单AI：吃子走法加分，确保不错过明显吃子机会
+    scored.forEach(s => {
+      const captured = Board.get(s.move.tx, s.move.ty);
+      if (captured !== Board.EMPTY) s.score += getValue(captured, s.move.ty) * 0.4;
+    });
+
     scored.sort((a, b) => b.score - a.score);
-    const topCount = Math.max(3, Math.ceil(scored.length * 0.4));
-    const pool = scored.slice(0, topCount);
-    // 加权随机：分高的概率更大，但不绝对
+
+    // 确保吃子走法不被遗漏：提取所有吃子走法 + Top-40%
+    const captures = scored.filter(s => Board.get(s.move.tx, s.move.ty) !== Board.EMPTY);
+    const topCount = Math.max(5, Math.ceil(scored.length * 0.35));
+    const topN = scored.slice(0, topCount);
+    // 合并去重
+    const poolMap = new Map();
+    topN.forEach(s => poolMap.set(`${s.move.fx},${s.move.fy},${s.move.tx},${s.move.ty}`, s));
+    captures.forEach(s => poolMap.set(`${s.move.fx},${s.move.fy},${s.move.tx},${s.move.ty}`, s));
+    const pool = [...poolMap.values()];
+
+    // 加权随机
     const totalWeight = pool.reduce((s, m, i) => s + (pool.length - i), 0);
     let r = Math.random() * totalWeight;
     for (let i = 0; i < pool.length; i++) {
