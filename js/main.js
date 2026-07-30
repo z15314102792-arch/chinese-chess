@@ -93,14 +93,34 @@ const Main = (() => {
     UI.getElement('btn-ai-easy').addEventListener('click', () => startGame(MODE.AI_EASY));
     UI.getElement('btn-ai-medium').addEventListener('click', () => startGame(MODE.AI_MEDIUM));
     UI.getElement('btn-online').addEventListener('click', showOnlineScreen);
+    UI.getElement('btn-themes').addEventListener('click', () => UI.showScreen('themes'));
+    UI.getElement('btn-rules').addEventListener('click', () => UI.showScreen('rules'));
     UI.getElement('btn-back').addEventListener('click', confirmBack);
     UI.getElement('btn-undo').addEventListener('click', handleUndo);
     UI.getElement('btn-restart').addEventListener('click', handleRestart);
     UI.getElement('btn-online-back').addEventListener('click', () => { P2P.disconnect(); UI.showScreen('menu'); });
+    UI.getElement('btn-theme-back').addEventListener('click', () => UI.showScreen('menu'));
+    UI.getElement('btn-rules-back').addEventListener('click', () => UI.showScreen('menu'));
     UI.getElement('btn-create-room').addEventListener('click', handleCreateRoom);
     UI.getElement('btn-join-room').addEventListener('click', handleJoinRoom);
     UI.getElement('btn-copy-room').addEventListener('click', handleCopyRoom);
     UI.getElement('btn-paste-room').addEventListener('click', handlePasteRoom);
+
+    // 规则页 Tab 切换
+    const tabs = UI.getElement('rules-tabs');
+    if (tabs) {
+      tabs.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('rules-tab')) return;
+        const tabName = e.target.dataset.tab;
+        tabs.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', t === e.target));
+        const content = document.getElementById('rules-content');
+        if (content) {
+          content.querySelectorAll('.rules-panel').forEach(p => {
+            p.classList.toggle('active', p.id === 'panel-' + tabName);
+          });
+        }
+      });
+    }
   }
 
   // ==================== 计时器 ====================

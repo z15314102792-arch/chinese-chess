@@ -17,7 +17,7 @@
   <div id="menu-screen" class="screen active">
     <div class="menu-container">
       <h1 class="title">中国象棋</h1>
-      <p class="subtitle">经典策略棋类游戏 · v2.1</p>
+      <p class="subtitle">经典策略棋类游戏 · v2.2</p>
       <div class="menu-buttons">
         <button id="btn-local" class="btn btn-primary">
           <span class="btn-icon">👥</span><span>本地双人</span>
@@ -30,6 +30,12 @@
         </button>
         <button id="btn-online" class="btn btn-accent">
           <span class="btn-icon">🌐</span><span>联机对战</span>
+        </button>
+        <button id="btn-themes" class="btn btn-secondary">
+          <span class="btn-icon">🎨</span><span>棋盘主题</span>
+        </button>
+        <button id="btn-rules" class="btn btn-secondary">
+          <span class="btn-icon">📖</span><span>游戏规则</span>
         </button>
       </div>
     </div>
@@ -129,6 +135,164 @@
       <div class="modal-buttons">
         <button id="btn-request-accept" class="btn btn-primary">同意</button>
         <button id="btn-request-reject" class="btn btn-secondary">拒绝</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主题选择界面 -->
+  <div id="theme-screen" class="screen">
+    <div class="theme-header">
+      <button id="btn-theme-back" class="btn-icon-only" title="返回">←</button>
+      <h2>棋盘主题</h2>
+    </div>
+    <div class="theme-container">
+      <div id="theme-grid" class="theme-grid"></div>
+    </div>
+  </div>
+
+  <!-- 游戏规则界面 -->
+  <div id="rules-screen" class="screen">
+    <div class="rules-header">
+      <button id="btn-rules-back" class="btn-icon-only" title="返回">←</button>
+      <h2>游戏规则</h2>
+    </div>
+    <div class="rules-tabs" id="rules-tabs">
+      <button class="rules-tab active" data-tab="basic">基础规则</button>
+      <button class="rules-tab" data-tab="advanced">进阶战术</button>
+    </div>
+    <div class="rules-content" id="rules-content">
+      <!-- 基础规则 -->
+      <div class="rules-panel active" id="panel-basic">
+        <section class="rules-section">
+          <h3>🏁 棋盘与棋子</h3>
+          <p>中国象棋棋盘为 <strong>9×10</strong> 网格，中间以「楚河汉界」分隔。红黑双方各持 <strong>16</strong> 枚棋子，红方先行。</p>
+          <p>红方棋子：帥、仕、相、馬、車、<strong>砲</strong>（石字旁）、兵</p>
+          <p>黑方棋子：將、士、象、馬、車、<strong>炮</strong>（火字旁）、卒</p>
+          <p class="rules-note">💡 红方用「砲」是传统规范，源于古代投石车；黑方用「炮」源于火炮。主流象棋产品均保留此区分。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>👑 将 / 帅</h3>
+          <p><strong>口诀：</strong>将帅不出九宫城，双王对面死局成</p>
+          <p>只能在九宫（3×3）内横竖走一格。<strong>将帅不能对面</strong>：若双方将帅在同一纵线上且无棋子遮挡，即为非法局面。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🛡️ 士 / 仕</h3>
+          <p><strong>口诀：</strong>士走斜线护将边，九宫之内保安全</p>
+          <p>在九宫内沿斜线行走，每步一格。是將/帅的贴身护卫，不能出九宫。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🐘 象 / 相</h3>
+          <p><strong>口诀：</strong>象飞四方田字角，河界之外不可过</p>
+          <p>走「田」字对角线（2×2 方格的对角）。<strong>塞象眼</strong>：田字中心有棋子则不能飞。<strong>不可过河</strong>，只能在本方半场活动。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🐴 马</h3>
+          <p><strong>口诀：</strong>马行日字一尖冲，蹩脚难行路不通</p>
+          <p>走「日」字对角线（1×2 矩形的对角）。<strong>蹩马脚</strong>：马前进方向上紧邻的交叉点有棋子时，不能向该方向跳。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🏰 车</h3>
+          <p><strong>口诀：</strong>车走直路任西东，横扫千军力最凶</p>
+          <p>沿横线或纵线任意距离行走，遇敌方棋子可吃掉。车是棋盘上威力最大的棋子。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>💣 炮 / 砲</h3>
+          <p><strong>口诀：</strong>炮须隔子翻山打，无架不食走如车</p>
+          <p>移动时与车相同（直线不限距离）。但<strong>吃子时必须隔一个棋子</strong>（炮架），不吃子时不可隔子。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>👣 兵 / 卒</h3>
+          <p><strong>口诀：</strong>小卒一去不回还，过河方能左右扳</p>
+          <p><strong>未过河</strong>：只能向前一步。<strong>过河后</strong>：可向前或左右走一步。<strong>永远不能后退</strong>。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>⚖️ 胜负与和棋</h3>
+          <p><strong>将死</strong>：攻击对方将/帅，对方无法应将 → 胜。</p>
+          <p><strong>困毙</strong>：对方无子可走（所有走法都会导致被将）→ 胜。</p>
+          <p><strong>和棋</strong>：双方均无力将死对方；或双方同意和棋。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>📝 记录方法</h3>
+          <p>红方用中文数字（一～九），黑方用阿拉伯数字（1～9）。纵线从右向左编号。如「车一进一」表示红方右路车前进一格。</p>
+          <p>进 = 前进，退 = 后退，平 = 横移。</p>
+        </section>
+      </div>
+
+      <!-- 进阶战术 -->
+      <div class="rules-panel" id="panel-advanced">
+        <section class="rules-section">
+          <h3>💥 双重炮（重炮）</h3>
+          <p>双炮在同一条纵线上重叠，前炮充当炮架，后炮将军。俗语「重炮无垫子」——对手无法垫子解围，任何垫入的棋子都会成为新的炮架。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🐴💣 马后炮</h3>
+          <p>马控制对方将帅的逃跑路线，炮在马后方借马为炮架将军。这是实战中用得最多的经典杀法，马与敌方将帅在同一直线上隔一格。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🔒 铁门栓</h3>
+          <p>中炮镇中路牵制对方士象，车或兵封住对方将门（肋道），使老将如同被铁门栓锁住无法动弹。配合「露将三把手」威力倍增。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🔪 大刀剜心</h3>
+          <p>主动弃车吃掉对方中心士，打破防线，再配合中炮或其他子力完成绝杀。用兵吃中士则称「小刀剜心」。凶狠凌厉的弃子攻杀。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🌍💣 天地炮</h3>
+          <p>一炮镇中路（地炮），一炮沉底（天炮），使对方防守力量被双向牵制，再以车配合将死。两炮一上一下如天地呼应。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🚗💣 夹车炮</h3>
+          <p>车和双炮集中于一侧，前后相互配合，交替将军取胜。三子配合如同双车，威力极大。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🎣 钓鱼马</h3>
+          <p>马跳到对方将门的象眼位置（三·八位或七·八位），封锁将门，再以车或其他棋子配合将军取胜。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🐅 侧面虎</h3>
+          <p>马在敌方将帅侧面（双士连环状），属车马冷着型杀法。典型着法：车沉底将军 → 马跳侧面锁位 → 车退回将死。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>😤 白脸将（对面笑）</h3>
+          <p>利用将帅不能对面的规则，一方用帅占中路，再以车等子力照将，使对方老将因不能对面而将死。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🔇 闷宫杀</h3>
+          <p>单炮利用对方双士自阻将帅退路，以对方的士做炮架将军取胜。对方的士反而害死了自己的将。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>📐 开局三原则</h3>
+          <p><strong>1. 快出大子：</strong>三步不出车，必输。开局优先把车马炮走到灵活位置。</p>
+          <p><strong>2. 均衡出子：</strong>一子忌多动，各子要协调，不要连续走同一个棋子。</p>
+          <p><strong>3. 抢占中路：</strong>中路是攻防枢纽，肋道是将门要害，尽早控制关键区域。</p>
+        </section>
+
+        <section class="rules-section">
+          <h3>🏁 残局要点</h3>
+          <p><strong>1.</strong> 熟记必胜/必和定式（如单车难胜士象全、单马无士难胜单士）。</p>
+          <p><strong>2.</strong> 兵卒过河胜一车——残局中兵卒价值大幅提升。</p>
+          <p><strong>3.</strong> 老帅要出来参战——残局子少，将帅应主动占中路配合进攻。</p>
+          <p><strong>4.</strong> 多做经典残局练习，推荐《适情雅趣》等古谱。</p>
+        </section>
       </div>
     </div>
   </div>
