@@ -398,13 +398,25 @@ const Main = (() => {
 
   function doAiUndo() {
     stopTimer();
-    Board.undo();
-    UI.clearAll();
-    UI.setMoveCount(Board.getMoveCount());
-    updatePlayerCards();
-    UI.setHint('已悔棋');
-    setTimeout(() => UI.setHint(''), 2000);
-    if (!gameOver) startTimer(Board.getCurrentPlayer());
+    // 第一步：撤销 AI 走子
+    const last = Board.undoOne();
+    UI.clearSelection();
+    if (last) {
+      UI.setLastMove(last.tx, last.ty, last.fx, last.fy, last.piece);
+    }
+    UI.draw();
+    UI.setHint('撤回 AI 走子…');
+
+    // 250ms 后撤销玩家走子（让玩家看清每一步）
+    setTimeout(() => {
+      Board.undoOne();
+      UI.clearSelection();
+      UI.draw();
+      UI.setMoveCount(Board.getMoveCount());
+      updatePlayerCards();
+      UI.setHint('已悔棋');
+      setTimeout(() => UI.setHint(''), 2000);
+    }, 250);
   }
 
   function doOnlineUndo() {

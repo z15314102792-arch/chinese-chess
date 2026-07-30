@@ -492,7 +492,6 @@ const UI = (() => {
 
   function hideRoomInfo() {
     elements['room-info'].classList.add('hidden');
-    elements['qr-code'].innerHTML = '';
   }
 
   function showJoinError(msg) {
