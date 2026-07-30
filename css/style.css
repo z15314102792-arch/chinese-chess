@@ -19,7 +19,7 @@
 html, body {
   width: 100%; height: 100%; overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: var(--bg); color: var(--text);
+  background: transparent; color: var(--text);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none; -webkit-user-select: none;
@@ -32,11 +32,11 @@ html, body {
 /* ===== 主菜单 ===== */
 .menu-container { max-width: 400px; width: 100%; padding: 60px 24px 40px; text-align: center; }
 .title { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), #f39c12); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
-.subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 48px; }
+.subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 48px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .menu-buttons { display: flex; flex-direction: column; gap: 14px; }
 
 /* ===== 按钮 ===== */
-.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px 24px; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 600; color: #fff; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; -webkit-tap-highlight-color: transparent; min-height: 52px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px 24px; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 600; color: #fff; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; -webkit-tap-highlight-color: transparent; min-height: 52px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 .btn:active { transform: scale(0.97); }
 .btn-icon { font-size: 1.3rem; }
 .btn-primary { background: linear-gradient(135deg, var(--primary), #c0392b); box-shadow: 0 4px 15px rgba(233, 68, 96, 0.4); }
@@ -63,7 +63,7 @@ html, body {
 .player-card {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 10px; border-radius: 12px;
-  background: var(--bg-card); border: 2px solid transparent;
+  background: rgba(0,0,0,0.55); border: 2px solid transparent;
   transition: border-color 0.3s, box-shadow 0.3s;
   min-width: 0; flex: 1; max-width: 160px;
 }
@@ -147,8 +147,8 @@ html, body {
 .online-header h2 { font-size: 1.3rem; }
 .online-container { max-width: 450px; width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 .online-section { text-align: center; }
-.online-section h3 { font-size: 1.15rem; margin-bottom: 8px; color: var(--primary); }
-.online-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+.online-section h3 { font-size: 1.15rem; margin-bottom: 8px; color: var(--primary); text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.online-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 .divider { display: flex; align-items: center; gap: 16px; color: var(--text-muted); font-size: 0.9rem; }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.15); }
 .join-form { display: flex; gap: 8px; }
@@ -215,13 +215,20 @@ html, body {
   background-color: #1a1008; /* 默认底色 */
 }
 
-/* ===== 20套动态背景 —— 每套不同技术手法，肉眼3秒可见 ===== */
+/* ===== 硬件加速背景层 ===== */
+#bg-layer {
+  position: fixed; inset: 0; z-index: -1;
+  background: #1a1008;
+  will-change: background-position, background-size;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
 
-body { background: #1a1008; }
+/* ===== 20+套动态背景 ===== */
 
 /* ==== 1. 流金条纹 —— repeating-linear-gradient 斜向流动 ==== */
 @keyframes stripeFlow { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
-body.bg-stripes {
+#bg-layer.bg-stripes {
   background-color: #1a0e04;
   background-image: repeating-linear-gradient(45deg,
     rgba(200,130,40,0.22) 0px, rgba(200,130,40,0.22) 60px,
@@ -233,7 +240,7 @@ body.bg-stripes {
 
 /* ==== 2. 涟漪扩散 —— repeating-radial-gradient + background-size 缩放 ==== */
 @keyframes rippleOut { 0% { background-size: 35px 35px; } 100% { background-size: 350px 350px; } }
-body.bg-ripple {
+#bg-layer.bg-ripple {
   background-color: #061220;
   background-image: repeating-radial-gradient(circle at 50% 50%,
     rgba(40,180,220,0.35) 0px, rgba(40,180,220,0.35) 2px,
@@ -249,7 +256,7 @@ body.bg-ripple {
   75%  { background-position: 50% 0%, 0% 100%, 100% 50%; }
   100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
 }
-body.bg-orbs {
+#bg-layer.bg-orbs {
   background-color: #12081e;
   background-image:
     radial-gradient(circle at 20% 80%, rgba(255,170,40,0.50) 0%, transparent 40%),
@@ -261,7 +268,7 @@ body.bg-orbs {
 
 /* ==== 4. 几何星芒 —— 大型放射纹滑动 ==== */
 @keyframes starburstSlide { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
-body.bg-spin {
+#bg-layer.bg-spin {
   background-color: #18181a;
   background-image:
     repeating-linear-gradient(30deg,
@@ -282,7 +289,7 @@ body.bg-spin {
   0%, 100% { background-size: 120% 120%; background-position: center; }
   50%      { background-size: 170% 170%; background-position: center; }
 }
-body.bg-breath {
+#bg-layer.bg-breath {
   background-color: #0c041c;
   background-image: radial-gradient(ellipse at center, #5a28b8 0%, #1e0850 50%, #0c041c 100%);
   background-size: 120% 120%;
@@ -292,7 +299,7 @@ body.bg-breath {
 
 /* ==== 6. 扫描光束 —— linear-gradient 光束横扫 ==== */
 @keyframes scanBeam { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
-body.bg-scan {
+#bg-layer.bg-scan {
   background-color: #030d18;
   background-image: linear-gradient(to right,
     transparent 42%, rgba(0,200,220,0.35) 48%,
@@ -308,7 +315,7 @@ body.bg-scan {
   50%      { background-position: 0% 65%; transform: skewY(4deg); }
   75%      { background-position: 0% 35%; transform: skewY(0deg); }
 }
-body.bg-aurora {
+#bg-layer.bg-aurora {
   background-color: #020814;
   background-image:
     linear-gradient(180deg, transparent 0%, rgba(0,220,160,0.20) 20%, rgba(0,180,240,0.15) 40%,
@@ -320,7 +327,7 @@ body.bg-aurora {
 /* ==== 8. 樱花飘落 —— 彩色光点垂直下落 ==== */
 @keyframes petalFall { 0% { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
   100% { background-position: 5% 120%, -3% 120%, 8% 120%, -5% 120%, 2% 120%; } }
-body.bg-petals {
+#bg-layer.bg-petals {
   background-color: #1a1220;
   background-image:
     radial-gradient(circle at 12% 5%, rgba(255,160,180,0.60) 0%, transparent 10px),
@@ -334,7 +341,7 @@ body.bg-petals {
 
 /* ==== 9. 细雨纷飞 —— 细长光丝下落 ==== */
 @keyframes rainFall { 0% { background-position: 0% -20%; } 100% { background-position: 0% 120%; } }
-body.bg-rain {
+#bg-layer.bg-rain {
   background-color: #080c18;
   background-image:
     repeating-linear-gradient(0deg, transparent, transparent 50px,
@@ -347,7 +354,7 @@ body.bg-rain {
 
 /* ==== 10. 网格滑移 —— 正交网格斜向无缝滑移 ==== */
 @keyframes meshSlide { 0% { background-position: 0 0, 0 0; } 100% { background-position: 55px 55px, 55px 55px; } }
-body.bg-mesh {
+#bg-layer.bg-mesh {
   background-color: #041208;
   background-image:
     repeating-linear-gradient(0deg, rgba(0,220,100,0.20) 0px, rgba(0,220,100,0.20) 1px,
@@ -362,7 +369,7 @@ body.bg-mesh {
   0%   { background-position: 0% 0%, 0% 0%, 0% 0%; }
   100% { background-position: 0% 60%, 0% -40%, 0% 30%; }
 }
-body.bg-wave {
+#bg-layer.bg-wave {
   background-color: #041420;
   background-image:
     repeating-linear-gradient(0deg,
@@ -387,7 +394,7 @@ body.bg-wave {
   33%      { background-position: 65% 55%, 35% 65%, 80% 40%; }
   66%      { background-position: 45% 35%, 60% 75%, 25% 60%; }
 }
-body.bg-lava {
+#bg-layer.bg-lava {
   background-color: #1a0604;
   background-image:
     radial-gradient(ellipse at 30% 70%, rgba(240,80,20,0.40) 0%, transparent 45%),
@@ -406,7 +413,7 @@ body.bg-lava {
   66%      { background-position: 80% 70%, 40% 20%, 35% 25%;
     background-size: 140% 140%, 160% 160%, 150% 150%; }
 }
-body.bg-morph {
+#bg-layer.bg-morph {
   background-color: #14141a;
   background-image:
     radial-gradient(ellipse at 25% 35%, rgba(190,195,205,0.28) 0%, transparent 55%),
@@ -420,7 +427,7 @@ body.bg-morph {
   0%, 100% { background-position: 20% 40%, 80% 60%, 50% 30%; }
   50%      { background-position: 80% 70%, 30% 20%, 60% 80%; }
 }
-body.bg-nebula {
+#bg-layer.bg-nebula {
   background-color: #040812;
   background-image:
     radial-gradient(ellipse at 20% 40%, rgba(180,60,200,0.22) 0%, transparent 55%),
@@ -435,7 +442,7 @@ body.bg-nebula {
   0%, 100% { background-size: 100% 100%; }
   50%      { background-size: 108% 108%; }
 }
-body.bg-frost {
+#bg-layer.bg-frost {
   background-color: #0a101c;
   background-image:
     radial-gradient(3px 3px at 15% 30%, rgba(180,220,255,0.80), transparent),
@@ -453,7 +460,7 @@ body.bg-frost {
 
 /* ==== 16. 极夜星空 —— 密集星场缓慢漂移 ==== */
 @keyframes starDrift { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 3% 5%; } }
-body.bg-stars {
+#bg-layer.bg-stars {
   background-color: #040410;
   background-image:
     radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.90), transparent),
@@ -484,7 +491,7 @@ body.bg-stars {
   89% { background-size: 100% 100%; }
   90% { background-size: 200% 200%; }
 }
-body.bg-volt {
+#bg-layer.bg-volt {
   background-color: #0a0a18;
   background-image:
     radial-gradient(ellipse at 40% 50%, rgba(100,200,255,0.55) 0%, rgba(60,160,240,0.20) 30%, transparent 60%),
@@ -498,7 +505,7 @@ body.bg-volt {
   0%, 100% { background-size: 160% 160%; background-position: 40% 45%; }
   50%      { background-size: 210% 210%; background-position: 60% 55%; }
 }
-body.bg-light {
+#bg-layer.bg-light {
   background-color: #d8cec0;
   background-image:
     radial-gradient(ellipse at 40% 40%, rgba(255,245,230,0.65) 0%, transparent 55%),
@@ -508,7 +515,7 @@ body.bg-light {
 }
 
 /* ==== 19. 禅意粒子 —— Canvas 驱动，Particles.js ==== */
-body.bg-particle {
+#bg-layer.bg-particle {
   background-color: #0f0a06;
   background-image: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(120,80,40,0.10) 0%, transparent 60%);
 }
@@ -518,7 +525,7 @@ body.bg-particle {
   0%, 100% { background-position: 40% 40%; }
   50%      { background-position: 60% 60%; }
 }
-body.bg-sand {
+#bg-layer.bg-sand {
   background-color: #d8c8b0;
   background-image:
     radial-gradient(ellipse at 30% 35%, rgba(255,240,210,0.60) 0%, transparent 50%),
@@ -532,7 +539,7 @@ body.bg-sand {
   0%, 100% { background-position: 20% 40%, 80% 50%; }
   50%      { background-position: 35% 35%, 65% 65%; }
 }
-body.bg-sky {
+#bg-layer.bg-sky {
   background-color: #c8d8e8;
   background-image:
     radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.60) 0%, transparent 55%),
@@ -546,7 +553,7 @@ body.bg-sky {
   0%, 100% { background-position: 45% 45%, 55% 55%; }
   50%      { background-position: 55% 40%, 45% 60%; }
 }
-body.bg-mint {
+#bg-layer.bg-mint {
   background-color: #c8dcc8;
   background-image:
     radial-gradient(ellipse at 40% 45%, rgba(240,255,240,0.55) 0%, transparent 55%),
@@ -560,7 +567,7 @@ body.bg-mint {
   0%, 100% { background-size: 160% 160%; background-position: 50% 50%; }
   50%      { background-size: 200% 200%; background-position: 48% 52%; }
 }
-body.bg-dusk {
+#bg-layer.bg-dusk {
   background-color: #d0c8d8;
   background-image:
     radial-gradient(ellipse at 50% 50%, rgba(245,235,255,0.55) 0%, transparent 55%),
@@ -573,7 +580,7 @@ body.bg-dusk {
   0%, 100% { background-position: 50% 50%; }
   50%      { background-position: 53% 48%; }
 }
-body.bg-none {
+#bg-layer.bg-none {
   background-color: #120a06;
   background-image:
     radial-gradient(ellipse at 50% 50%, rgba(40,25,15,0.40) 0%, transparent 60%),
@@ -708,15 +715,15 @@ body.bg-none {
 
 /* ==================== 移动端 & 无障碍 ==================== */
 @media (max-width: 768px) {
-  body.bg-stripes, body.bg-ripple { animation-duration: 12s; }
-  body.bg-orbs { animation-duration: 18s; }
-  body.bg-spin { animation-duration: 50s; }
-  body.bg-scan { animation-duration: 8s; }
-  body.bg-rain { animation-duration: 10s; }
+  #bg-layer.bg-stripes, #bg-layer.bg-ripple { animation-duration: 12s; }
+  #bg-layer.bg-orbs { animation-duration: 18s; }
+  #bg-layer.bg-spin { animation-duration: 50s; }
+  #bg-layer.bg-scan { animation-duration: 8s; }
+  #bg-layer.bg-rain { animation-duration: 10s; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[class*="bg-"], body[class*="bg-"]::before, body[class*="bg-"]::after {
+  #bg-layer[class*="bg-"], #bg-layer[class*="bg-"]::before, #bg-layer[class*="bg-"]::after {
     animation: none !important; animation-duration: 0s !important;
   }
 }

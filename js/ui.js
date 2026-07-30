@@ -156,10 +156,12 @@ const UI = (() => {
   }
 
   function applyBgTheme() {
-    // 清除所有 bg- 前缀的背景类（用 BG_THEMES 动态获取）
-    BG_THEMES.forEach(t => { if (t.cls) document.body.classList.remove(t.cls); });
+    const layer = document.getElementById('bg-layer');
+    if (!layer) return;
+    // 清除所有 bg- 前缀的背景类
+    BG_THEMES.forEach(t => { if (t.cls) layer.classList.remove(t.cls); });
     // 应用新背景类
-    if (currentBgTheme.cls) document.body.classList.add(currentBgTheme.cls);
+    if (currentBgTheme.cls) layer.classList.add(currentBgTheme.cls);
     // Canvas 粒子管理
     if (currentBgTheme.id === 'bg-particle') {
       if (typeof Particles !== 'undefined') Particles.start();
