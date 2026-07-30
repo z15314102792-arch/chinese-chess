@@ -219,39 +219,46 @@ const Main = (() => {
   }
 
   /** 将军提醒体系：横幅+棋盘高亮+红框（双方不同显示） */
+  /** 将军提醒——从「人类玩家」视角判断（非当前回合方） */
   function showCheckStatus() {
-    const current = Board.getCurrentPlayer();
     const banner = document.getElementById('check-banner');
+    const isAI = (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM);
+    const isOnline = (currentMode === MODE.ONLINE);
 
-    if (Board.isInCheck(current)) {
-      // 当前走子方被将军
-      banner.textContent = '⚠ 你被将军！必须应将';
+    // 确定人类玩家颜色
+    let myColor, oppColor;
+    if (isAI) {
+      myColor = Board.RED;                            // 人机：人=红
+      oppColor = Board.BLACK;
+    } else if (isOnline) {
+      myColor = onlinePlayerColor;                    // 联机：人=onlinePlayerColor
+      oppColor = myColor === Board.RED ? Board.BLACK : Board.RED;
+    } else {
+      myColor = Board.getCurrentPlayer();             // 本地：当前回合方即操作者
+      oppColor = myColor === Board.RED ? Board.BLACK : Board.RED;
+    }
+
+    // 清除旧状态
+    document.getElementById('red-card').classList.remove('timeout');
+    document.getElementById('black-card').classList.remove('timeout');
+
+    if (Board.isInCheck(myColor)) {
+      // 我被将军 → 防守方
+      banner.textContent = isAI || isOnline ? '⚠ 你被将军！必须应将' : '⚠ 被将军！必须应将';
       banner.className = 'check-banner defender';
-      UI.setCheckHighlight(current, true);
-      UI.setHint('');
-
-      // 被将方卡片红框
-      const cardId = current === Board.RED ? 'red-card' : 'black-card';
+      UI.setCheckHighlight(myColor, true);
+      const cardId = myColor === Board.RED ? 'red-card' : 'black-card';
+      document.getElementById(cardId).classList.add('timeout');
+    } else if (Board.isInCheck(oppColor)) {
+      // 对方被将军 → 进攻方
+      banner.textContent = isAI || isOnline ? '⚔ 将军！对方必须应将' : '⚔ 将军！';
+      banner.className = 'check-banner attacker';
+      UI.setCheckHighlight(oppColor, false);
+      const cardId = oppColor === Board.RED ? 'red-card' : 'black-card';
       document.getElementById(cardId).classList.add('timeout');
     } else {
-      // 检查是否上将（当前方刚刚将军了对方）
-      const opponent = current === Board.RED ? Board.BLACK : Board.RED;
-      if (Board.isInCheck(opponent)) {
-        banner.textContent = '⚔ 将军！对方必须应将';
-        banner.className = 'check-banner attacker';
-        UI.setCheckHighlight(opponent, false);
-        UI.setHint('');
-        // 被将方卡片红框
-        const cardId = opponent === Board.RED ? 'red-card' : 'black-card';
-        document.getElementById(cardId).classList.add('timeout');
-      } else {
-        banner.className = 'check-banner hidden';
-        UI.clearCheckHighlight();
-        UI.setHint('');
-        // 清除卡片红框
-        document.getElementById('red-card').classList.remove('timeout');
-        document.getElementById('black-card').classList.remove('timeout');
-      }
+      banner.className = 'check-banner hidden';
+      UI.clearCheckHighlight();
     }
   }
 
@@ -640,7 +647,15 @@ const Main = (() => {
     startTimer(Board.getCurrentPlayer());
   }
 
-  function onP2PError(msg) { UI.showToast(msg, 4000); }
+  function onP2PError(msg) {
+    console.error('[P2P]', msg);
+    UI.showToast(msg, 5000);
+    // 恢复按钮状态
+    const createBtn = UI.getElement('btn-create-room');
+    const joinBtn = UI.getElement('btn-join-room');
+    if (createBtn) { createBtn.disabled = false; createBtn.textContent = '创建房间'; }
+    if (joinBtn) { joinBtn.disabled = false; joinBtn.textContent = '加入'; }
+  }
 
   function acceptRequest() {
     UI.hideRequest();
