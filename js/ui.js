@@ -19,6 +19,7 @@ const UI = (() => {
   let legalMoves = [];          // [{x, y}, ...] 合法目标位置
   let lastFrom = null;          // {x, y} 上一步起点
   let lastTo = null;            // {x, y} 上一步终点
+  let lastMoveColor = null;     // 上一步走子方颜色（红/黑）
   let checkKingPos = null;      // {x, y} 被将军的帅/将位置
   let checkFlash = 0;           // 将军闪烁计数器
   let checkIsDefender = true;   // 当前玩家是被将方还是进攻方
@@ -216,13 +217,16 @@ const UI = (() => {
       ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // ★ 最后一步标记（淡蓝色圆形，比方形更自然）
+    // ★ 最后一步标记（红方红底、黑方灰底，区分谁走的）
     if (lastFrom && lastTo) {
+      const isRed = lastMoveColor === board.RED;
+      const fillColor = isRed ? 'rgba(220,80,80,0.4)' : 'rgba(80,80,100,0.45)';
+      const strokeColor = isRed ? 'rgba(220,80,80,0.7)' : 'rgba(80,80,100,0.7)';
       [lastFrom, lastTo].forEach(pos => {
         const cx = p + pos.x * s, cy = p + pos.y * s;
-        ctx.fillStyle = 'rgba(100,180,255,0.4)';
+        ctx.fillStyle = fillColor;
         ctx.beginPath(); ctx.arc(cx, cy, s * 0.42, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(100,180,255,0.6)';
+        ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(cx, cy, s * 0.42, 0, Math.PI * 2); ctx.stroke();
       });
@@ -364,9 +368,9 @@ const UI = (() => {
     animToX = tx; animToY = ty;
     animStart = performance.now();
 
-    // 标记已经落子（动画期间显示在中间位置）
     lastFrom = { x: fx, y: fy };
     lastTo = { x: tx, y: ty };
+    lastMoveColor = board.getColor(piece);
 
     function animLoop(now) {
       const elapsed = now - animStart;
@@ -383,15 +387,17 @@ const UI = (() => {
     animRAF = requestAnimationFrame(animLoop);
   }
 
-  function setLastMove(fx, fy, tx, ty) {
+  function setLastMove(fx, fy, tx, ty, piece) {
     lastFrom = { x: fx, y: fy };
     lastTo = { x: tx, y: ty };
+    lastMoveColor = piece ? board.getColor(piece) : null;
     if (!animPiece) draw();
   }
 
   function clearLastMove() {
     lastFrom = null;
     lastTo = null;
+    lastMoveColor = null;
   }
 
   function clearAll() {

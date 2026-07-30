@@ -1,69 +1,96 @@
 /**
- * 中国象棋 AI 引擎
+ * 中国象棋 AI 引擎 v2
  *
- * 简单模式：2层Minimax + 大量随机性（模拟初学者）
- * 中等模式：3层Alpha-Beta + 位置评估 + 适度随机（模拟业余棋手）
+ * 简单模式：2层Minimax + 将军奖励 + 随机多样性
+ * 中等模式：3层Alpha-Beta + 将军延伸 + 威胁评估 + 走法排序
  *
- * 设计原则：
- *  - 不过度追求子力优势，重视局面平衡
- *  - 加入随机性避免模板化走棋
- *  - 两个难度有明显棋力差距
+ * 核心改进：
+ *  - 将军奖励：走子后将军对方 +80分
+ *  - 威胁评估：攻击对方棋子加分，己方被攻击扣分
+ *  - 灵活度奖励：可走位置越多越好
+ *  - 将军延伸：搜索叶节点遇将军自动加深
  */
 const AI = (() => {
-  const PIECE_VALUE = {
-    0: 10000,  // 帥/將
-    4: 500,    // 車（降权，减少激进兑子）
-    3: 280,    // 馬
-    5: 280,    // 砲/炮
-    2: 110,    // 相/象
-    1: 110,    // 仕/士
-    6: 50,     // 兵/卒(未过河)
-  };
+  // 子力价值
+  const V = { K:10000, R:500, C:280, H:280, E:110, A:110, P:50 };
   const PAWN_CROSSED = 120;
 
   function getValue(piece, y) {
-    const type = Board.getType(piece);
-    if (type !== Board.PAWN) return PIECE_VALUE[type] || 0;
-    const color = Board.getColor(piece);
-    if (color === Board.RED && y <= 4) return PAWN_CROSSED;
-    if (color === Board.BLACK && y >= 5) return PAWN_CROSSED;
-    return PIECE_VALUE[Board.PAWN];
+    const t = Board.getType(piece);
+    if (t === Board.KING) return V.K;
+    if (t === Board.ROOK) return V.R;
+    if (t === Board.CANNON) return V.C;
+    if (t === Board.HORSE) return V.H;
+    if (t === Board.ELEPHANT) return V.E;
+    if (t === Board.ADVISOR) return V.A;
+    if (t === Board.PAWN) {
+      const c = Board.getColor(piece);
+      return (c === Board.RED && y <= 4) || (c === Board.BLACK && y >= 5) ? PAWN_CROSSED : V.P;
+    }
+    return 0;
   }
 
-  // 位置价值
+  // 位置加分
   function posBonus(piece, x, y) {
-    const type = Board.getType(piece);
-    const color = Board.getColor(piece);
+    const t = Board.getType(piece), c = Board.getColor(piece);
     let b = 0;
     if (x >= 3 && x <= 5) b += 2;
-    const crossed = (color === Board.RED && y <= 4) || (color === Board.BLACK && y >= 5);
-    if ((type === Board.ROOK || type === Board.HORSE || type === Board.CANNON) && crossed) b += 8;
-    if (type === Board.PAWN && crossed && x >= 3 && x <= 5) b += 5;
-    if (type === Board.KING) b += (x === 4 ? 5 : 0) + (color === Board.RED ? (9 - y) : y) * 0.5;
+    const crossed = (c === Board.RED && y <= 4) || (c === Board.BLACK && y >= 5);
+    if ((t === Board.ROOK || t === Board.HORSE || t === Board.CANNON) && crossed) b += 10;
+    if (t === Board.PAWN && crossed && x >= 3 && x <= 5) b += 6;
+    if (t === Board.KING) b += (x === 4 ? 5 : 0);
     return b;
   }
 
-  // 移动性奖励
-  function mobilityBonus(board, color) {
-    const moves = board.getAllLegalMoves(color);
-    return Math.min(moves.length * 2, 60);
-  }
+  // ========= 评估函数 v2 =========
 
   function evaluate(board, aiColor) {
+    const opp = aiColor === Board.RED ? Board.BLACK : Board.RED;
+    let score = 0;
+
+    for (let y = 0; y < Board.ROWS; y++) {
+      for (let x = 0; x < Board.COLS; x++) {
+        const p = board.get(x, y);
+        if (p === Board.EMPTY) continue;
+        const val = getValue(p, y) + posBonus(p, x, y);
+        score += (Board.getColor(p) === aiColor) ? val : -val;
+      }
+    }
+
+    // ★ 灵活度奖励（鼓励子力活跃）
+    score += board.getAllLegalMoves(aiColor).length * 1.5;
+    score -= board.getAllLegalMoves(opp).length * 1.0;
+
+    // ★ 将军奖励
+    if (board.isInCheck(opp)) score += 80;
+    if (board.isInCheck(aiColor)) score -= 120;
+
+    // ★ 威胁评估：攻击对方大子加分
+    const aiMoves = board.getAllLegalMoves(aiColor);
+    for (const m of aiMoves) {
+      const target = board.get(m.tx, m.ty);
+      if (target !== Board.EMPTY && Board.getColor(target) === opp) {
+        score += getValue(target, m.ty) * 0.15;
+      }
+    }
+
+    return score;
+  }
+
+  // 快速评估（不用 getAllLegalMoves，更快）
+  function evaluateFast(board, aiColor) {
+    const opp = aiColor === Board.RED ? Board.BLACK : Board.RED;
     let score = 0;
     for (let y = 0; y < Board.ROWS; y++) {
       for (let x = 0; x < Board.COLS; x++) {
         const p = board.get(x, y);
         if (p === Board.EMPTY) continue;
-        const color = Board.getColor(p);
         const val = getValue(p, y) + posBonus(p, x, y);
-        score += (color === aiColor) ? val : -val;
+        score += (Board.getColor(p) === aiColor) ? val : -val;
       }
     }
-    // 移动性加分（鼓励活跃，减少龟缩）
-    score += mobilityBonus(board, aiColor) * 0.5;
-    const opponent = aiColor === Board.RED ? Board.BLACK : Board.RED;
-    score -= mobilityBonus(board, opponent) * 0.3;
+    if (board.isInCheck(opp)) score += 80;
+    if (board.isInCheck(aiColor)) score -= 120;
     return score;
   }
 
@@ -81,14 +108,13 @@ const AI = (() => {
     const allMoves = board.getAllLegalMoves(aiColor);
     if (allMoves.length === 0) return null;
 
-    // 对每个走法打分（2层Minimax）
     const scored = [];
     for (const m of allMoves) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
       board.switchPlayer();
 
-      // 对手最佳回应
+      // 对手最佳回应（采样15个）
       const oppMoves = board.getAllLegalMoves(board.getCurrentPlayer());
       let oppBest = -Infinity;
       const sampleN = Math.min(oppMoves.length, 15);
@@ -96,35 +122,36 @@ const AI = (() => {
         const om = oppMoves[Math.floor(Math.random() * oppMoves.length)];
         const s2 = board.getState();
         board.movePiece(om.fx, om.fy, om.tx, om.ty);
-        oppBest = Math.max(oppBest, evaluate(board, aiColor));
+        oppBest = Math.max(oppBest, evaluateFast(board, aiColor));
         board.loadState(s2);
       }
       if (oppMoves.length === 0) oppBest = -99999;
 
-      const netScore = evaluate(board, aiColor) - oppBest * 0.6;
-      board.loadState(saved);
-      scored.push({ move: m, score: netScore });
-    }
+      let score = evaluateFast(board, aiColor) - oppBest * 0.55;
 
-    // ★ 简单AI：吃子走法加分，确保不错过明显吃子机会
-    scored.forEach(s => {
-      const captured = Board.get(s.move.tx, s.move.ty);
-      if (captured !== Board.EMPTY) s.score += getValue(captured, s.move.ty) * 0.4;
-    });
+      // ★ 吃子额外加分（确保不吃子漏洞）
+      if (saved.grid[m.fy][m.fx] !== Board.EMPTY) {
+        const captured = board.get(m.tx, m.ty);
+        if (captured !== Board.EMPTY && Board.getColor(captured) !== aiColor) {
+          score += getValue(captured, m.ty) * 0.25;
+        }
+      }
+
+      board.loadState(saved);
+      scored.push({ move: m, score });
+    }
 
     scored.sort((a, b) => b.score - a.score);
 
-    // 确保吃子走法不被遗漏：提取所有吃子走法 + Top-40%
-    const captures = scored.filter(s => Board.get(s.move.tx, s.move.ty) !== Board.EMPTY);
+    // 吃子走法强制入池
+    const captures = scored.filter(s => board.get(s.move.tx, s.move.ty) !== Board.EMPTY);
     const topCount = Math.max(5, Math.ceil(scored.length * 0.35));
     const topN = scored.slice(0, topCount);
-    // 合并去重
     const poolMap = new Map();
     topN.forEach(s => poolMap.set(`${s.move.fx},${s.move.fy},${s.move.tx},${s.move.ty}`, s));
     captures.forEach(s => poolMap.set(`${s.move.fx},${s.move.fy},${s.move.tx},${s.move.ty}`, s));
     const pool = [...poolMap.values()];
 
-    // 加权随机
     const totalWeight = pool.reduce((s, m, i) => s + (pool.length - i), 0);
     let r = Math.random() * totalWeight;
     for (let i = 0; i < pool.length; i++) {
@@ -144,7 +171,6 @@ const AI = (() => {
     sortMoves(allMoves, board);
     const candidates = allMoves.slice(0, 35);
 
-    // Alpha-Beta 深度3
     const scored = [];
     for (const m of candidates) {
       const saved = board.getState();
@@ -156,20 +182,23 @@ const AI = (() => {
     }
 
     scored.sort((a, b) => b.score - a.score);
-
-    // ★ 中等AI：从Top-25%随机选（有棋力但不模板化）
     const topCount = Math.max(2, Math.ceil(scored.length * 0.25));
     const pool = scored.slice(0, topCount);
-    // 加入少量随机噪声扰动排序
-    const noisy = pool.map((m, i) => ({ ...m, noise: m.score + (Math.random() - 0.5) * 15 }));
+    const noisy = pool.map(m => ({ ...m, noise: m.score + (Math.random() - 0.5) * 12 }));
     noisy.sort((a, b) => b.noise - a.noise);
     return noisy[0].move;
   }
 
+  /**
+   * Negamax + 将军延伸
+   */
   function negamax(board, depth, alpha, beta, aiColor) {
     const currentColor = board.getCurrentPlayer();
+
+    // ★ 将军延伸：叶节点遇将军，加深一层
     if (depth === 0) {
-      return evaluate(board, aiColor) * (currentColor === aiColor ? 1 : -1);
+      if (board.isInCheck(currentColor)) depth = 1;
+      else return evaluateFast(board, aiColor) * (currentColor === aiColor ? 1 : -1);
     }
 
     const allMoves = board.getAllLegalMoves(currentColor);
