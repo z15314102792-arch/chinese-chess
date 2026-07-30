@@ -184,13 +184,21 @@ const UI = (() => {
       ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // 最后一步标记
+    // ★ 最后一步标记（起止点明显区分）
     if (lastFrom && lastTo) {
-      [lastFrom, lastTo].forEach(pos => {
-        const lx = p + pos.x * s, ly = p + pos.y * s;
-        ctx.fillStyle = 'rgba(233,68,96,0.3)';
-        ctx.beginPath(); ctx.arc(lx, ly, s * 0.15, 0, Math.PI * 2); ctx.fill();
-      });
+      // 起点 — 橙色空心环
+      const fx = p + lastFrom.x * s, fy = p + lastFrom.y * s;
+      ctx.strokeStyle = 'rgba(255,165,0,0.85)';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(fx, fy, s * 0.28, 0, Math.PI * 2); ctx.stroke();
+
+      // 终点 — 红色半透明实心圆
+      const tx = p + lastTo.x * s, ty = p + lastTo.y * s;
+      ctx.fillStyle = 'rgba(233,68,96,0.45)';
+      ctx.beginPath(); ctx.arc(tx, ty, s * 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(233,68,96,0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(tx, ty, s * 0.28, 0, Math.PI * 2); ctx.stroke();
     }
   }
 

@@ -108,7 +108,7 @@ const Board = (() => {
   /** 两子同色 */
   function sameSide(a, b) {
     if (a === EMPTY || b === EMPTY) return false;
-    return (a - 1) >> 3 === (b - 1) >> 3;
+    return isRed(a) === isRed(b);
   }
 
   // ==================== 基础 API ====================

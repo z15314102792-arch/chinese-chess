@@ -1,43 +1,66 @@
 /**
  * 中国象棋 AI 引擎
  *
- * 简单模式：贪心搜索（评估所有走法，选最高分）
- * 中等模式：MiniMax + Alpha-Beta 剪枝（深度 2-3）
- *
- * 棋子价值参考王骄(2005)遗传算法优化权重
+ * 简单模式：贪心搜索 + 随机噪声（模拟初学者水平）
+ * 中等模式：MiniMax + Alpha-Beta 剪枝（深度 3）+ 位置评估
  */
 const AI = (() => {
-  // 棋子基础价值
+  // 棋子基础价值（调整：炮略低于马，减少激进炮换马）
   const PIECE_VALUE = {
     0: 10000,  // 帥/將
     4: 600,    // 車
-    5: 400,    // 砲/炮
-    3: 300,    // 馬
+    3: 350,    // 馬
+    5: 320,    // 砲/炮（降权，减少开局炮换马）
     2: 120,    // 相/象
     1: 120,    // 仕/士
-    6: 60,     // 兵/卒(未过河)
+    6: 55,     // 兵/卒(未过河)
   };
 
-  // 兵过河后价值翻倍
   const PAWN_CROSSED = 120;
 
-  /** 获取棋子动态价值 */
   function getValue(piece, y) {
     const type = Board.getType(piece);
-    const color = Board.getColor(piece);
     if (type !== Board.PAWN) return PIECE_VALUE[type] || 0;
-
-    // 兵/卒：过河后价值提升
+    const color = Board.getColor(piece);
     if (color === Board.RED && y <= 4) return PAWN_CROSSED;
     if (color === Board.BLACK && y >= 5) return PAWN_CROSSED;
     return PIECE_VALUE[Board.PAWN];
   }
 
+  // ==================== 位置价值加成 ====================
+
+  /** 简单位置加分：中路 + 过河 + 前线 */
+  function positionBonus(piece, x, y) {
+    const type = Board.getType(piece);
+    const color = Board.getColor(piece);
+    let bonus = 0;
+
+    // 中路控制（列 3-5）
+    if (x >= 3 && x <= 5) bonus += 3;
+
+    if (type === Board.ROOK || type === Board.HORSE || type === Board.CANNON) {
+      // 鼓励大子过河
+      if (color === Board.RED && y <= 4) bonus += 8;
+      if (color === Board.BLACK && y >= 5) bonus += 8;
+    }
+
+    if (type === Board.PAWN) {
+      // 兵过河后中路加分更多
+      const crossed = (color === Board.RED && y <= 4) || (color === Board.BLACK && y >= 5);
+      if (crossed && x >= 3 && x <= 5) bonus += 5;
+    }
+
+    if (type === Board.KING) {
+      // 将/帅靠边不安全，中间更好
+      if (x === 4) bonus += 5;
+    }
+
+    return bonus;
+  }
+
   // ==================== 评估函数 ====================
 
-  /** 评估局面得分（从 AI 方视角，正数利于 AI） */
   function evaluate(board, aiColor) {
-    const opponent = aiColor === Board.RED ? Board.BLACK : Board.RED;
     let score = 0;
 
     for (let y = 0; y < Board.ROWS; y++) {
@@ -45,32 +68,27 @@ const AI = (() => {
         const p = board.get(x, y);
         if (p === Board.EMPTY) continue;
         const color = Board.getColor(p);
-        const val = getValue(p, y);
-        if (color === aiColor) {
-          score += val;
-        } else {
-          score -= val;
-        }
+        const val = getValue(p, y) + positionBonus(p, x, y);
+        score += (color === aiColor) ? val : -val;
       }
     }
 
     return score;
   }
 
-  // ==================== 走法排序（提升 Alpha-Beta 剪枝效率） ====================
+  // ==================== 走法排序 ====================
 
-  /** MVV-LVA：被吃子价值 - 攻击子价值，高分优先 */
   function sortMoves(moves, board) {
     return moves.sort((a, b) => {
       const capA = board.get(a.tx, a.ty);
       const capB = board.get(b.tx, b.ty);
       const valA = capA !== Board.EMPTY ? getValue(capA, a.ty) : 0;
       const valB = capB !== Board.EMPTY ? getValue(capB, b.ty) : 0;
-      return valB - valA;  // 吃子价值高的优先
+      return valB - valA;
     });
   }
 
-  // ==================== 简单模式：贪心搜索 ====================
+  // ==================== 简单模式：贪心搜索 + 噪声 ====================
 
   function easyMove(board) {
     const aiColor = board.getCurrentPlayer();
@@ -83,18 +101,37 @@ const AI = (() => {
     for (const m of allMoves) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
-      const score = evaluate(board, aiColor);
+
+      let score = evaluate(board, aiColor);
+
+      // ★ 吃子时加入交易惩罚（模拟可能被反吃的风险）
+      const captured = board.get(m.tx, m.ty);
+      if (captured !== Board.EMPTY) {
+        const attackerVal = getValue(saved.grid[m.fy][m.fx], m.fy);
+        const capturedVal = getValue(captured, m.ty);
+        // 净收益 = 吃子价值 - 攻击子风险（30%概率被反吃）
+        const netGain = capturedVal - attackerVal * 0.3;
+        // 添加到分数（正数表示赚了，负数表示亏了）
+        score += netGain * 0.5;
+      }
+
+      // ★ 简单 AI 加轻微随机噪声 (-15 ~ +15)，不那么机械
+      score += (Math.random() - 0.5) * 30;
+
       board.loadState(saved);
 
       if (score > bestScore) {
         bestScore = score;
         bestMoves = [m];
-      } else if (score === bestScore) {
+      } else if (Math.abs(score - bestScore) < 5) {
+        // 分数接近时也加入候选
         bestMoves.push(m);
       }
     }
 
-    return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    // 从最优的几个中随机选（增加变化性）
+    const topN = bestMoves.slice(0, Math.max(3, bestMoves.length));
+    return topN[Math.floor(Math.random() * topN.length)];
   }
 
   // ==================== 中等模式：Alpha-Beta ====================
@@ -106,12 +143,15 @@ const AI = (() => {
 
     sortMoves(allMoves, board);
 
-    let bestMove = allMoves[0];
+    // 限制走法数（性能优化，只搜索前 30 个最优候选）
+    const candidates = allMoves.slice(0, 30);
+
+    let bestMove = candidates[0];
     let bestScore = -Infinity;
     let alpha = -Infinity;
     const beta = Infinity;
 
-    for (const m of allMoves) {
+    for (const m of candidates) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
       const score = -negamax(board, 2, -beta, -alpha, aiColor);
@@ -127,34 +167,24 @@ const AI = (() => {
     return bestMove;
   }
 
-  /**
-   * Negamax 搜索
-   * @param {object} board   Board 模块
-   * @param {number} depth   剩余搜索深度
-   * @param {number} alpha   Alpha 边界
-   * @param {number} beta    Beta 边界
-   * @param {number} aiColor AI 的颜色（用于评估符号）
-   */
   function negamax(board, depth, alpha, beta, aiColor) {
     const currentColor = board.getCurrentPlayer();
 
-    // 叶节点：评估
     if (depth === 0) {
       return evaluate(board, aiColor) * (currentColor === aiColor ? 1 : -1);
     }
 
     const allMoves = board.getAllLegalMoves(currentColor);
 
-    // 无走法：将死或困毙
     if (allMoves.length === 0) {
-      // 对当前走子方不利
-      return -99999 + (3 - depth) * 100;  // 越晚被将死越好
+      return -99999 + (3 - depth) * 100;
     }
 
     sortMoves(allMoves, board);
+    const candidates = allMoves.slice(0, 25);
 
     let best = -Infinity;
-    for (const m of allMoves) {
+    for (const m of candidates) {
       const saved = board.getState();
       board.movePiece(m.fx, m.fy, m.tx, m.ty);
       const score = -negamax(board, depth - 1, -beta, -alpha, aiColor);
@@ -162,7 +192,7 @@ const AI = (() => {
 
       if (score > best) best = score;
       if (score > alpha) alpha = score;
-      if (alpha >= beta) break;  // Beta 剪枝
+      if (alpha >= beta) break;
     }
 
     return best;
@@ -170,11 +200,6 @@ const AI = (() => {
 
   // ==================== 公共接口 ====================
 
-  /**
-   * 获取 AI 最佳走法
-   * @param {string} difficulty  'easy' | 'medium'
-   * @returns {{fx, fy, tx, ty} | null}
-   */
   function getMove(board, difficulty) {
     if (difficulty === 'medium') {
       return mediumMove(board);
