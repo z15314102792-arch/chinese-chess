@@ -6,6 +6,7 @@ const FILES_TO_CACHE = [
   './js/board.js',
   './js/ai.js',
   './js/p2p.js',
+  './js/particles.js',
   './js/ui.js',
   './js/main.js',
   './manifest.json',
