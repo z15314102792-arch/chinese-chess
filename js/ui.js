@@ -43,7 +43,7 @@ const UI = (() => {
       'btn-play-again','btn-to-menu','btn-request-accept','btn-request-reject',
       'red-name','red-timer','black-name','black-timer',
       'red-card','black-card','move-count',
-      'room-id-display','room-info','qr-code','input-room-id',
+      'room-id-display','room-info','input-room-id',
       'join-error','win-modal','win-text','request-modal','request-text',
       'toast','game-hint',
     ];
@@ -185,13 +185,19 @@ const UI = (() => {
     for (const m of legalMoves) {
       const mx = p + m.x * s, my = p + m.y * s;
       if (board.get(m.x, m.y) !== board.EMPTY) {
-        // 可吃子位置 — 红色圆环
-        ctx.strokeStyle = 'rgba(220,50,50,0.7)';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(mx, my, s * 0.44, 0, Math.PI * 2); ctx.stroke();
+        // ★ 可吃子位置 — 红色粗环 + 红色填充高亮敌棋
+        ctx.fillStyle = 'rgba(255,50,50,0.25)';
+        ctx.beginPath(); ctx.arc(mx, my, s * 0.44, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,30,30,0.85)';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath(); ctx.arc(mx, my, s * 0.46, 0, Math.PI * 2); ctx.stroke();
+        // 外环
+        ctx.strokeStyle = 'rgba(255,60,60,0.4)';
+        ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.arc(mx, my, s * 0.50, 0, Math.PI * 2); ctx.stroke();
       } else {
         // 空位 — 绿色半透明圆点
-        ctx.fillStyle = 'rgba(0,160,0,0.4)';
+        ctx.fillStyle = 'rgba(0,160,0,0.45)';
         ctx.beginPath(); ctx.arc(mx, my, s * 0.18, 0, Math.PI * 2); ctx.fill();
       }
     }
@@ -209,12 +215,15 @@ const UI = (() => {
       ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // ★ 最后一步标记（淡蓝色半透明方块，国际象棋标准做法）
+    // ★ 最后一步标记（淡蓝色圆形，比方形更自然）
     if (lastFrom && lastTo) {
       [lastFrom, lastTo].forEach(pos => {
-        const bx = p + pos.x * s - s * 0.42, by = p + pos.y * s - s * 0.42;
-        ctx.fillStyle = 'rgba(100,180,255,0.35)';
-        ctx.fillRect(bx, by, s * 0.84, s * 0.84);
+        const cx = p + pos.x * s, cy = p + pos.y * s;
+        ctx.fillStyle = 'rgba(100,180,255,0.4)';
+        ctx.beginPath(); ctx.arc(cx, cy, s * 0.42, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(100,180,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, s * 0.42, 0, Math.PI * 2); ctx.stroke();
       });
     }
 
@@ -465,14 +474,6 @@ const UI = (() => {
   function showRoomInfo(roomId) {
     elements['room-id-display'].textContent = roomId;
     elements['room-info'].classList.remove('hidden');
-    const qr = elements['qr-code']; qr.innerHTML = '';
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(qr, {
-        text: location.origin + location.pathname + '?room=' + roomId,
-        width: 140, height: 140,
-        colorDark: '#2c1810', colorLight: '#ffffff',
-      });
-    }
   }
 
   function hideRoomInfo() {

@@ -107,20 +107,29 @@ html, body {
 /* 将军横幅 */
 .check-banner {
   width: 100%; max-width: 500px; text-align: center;
-  padding: 8px 16px; font-size: 1.2rem; font-weight: 800;
-  letter-spacing: 4px; border-radius: 0;
+  padding: 10px 16px; font-size: 1.3rem; font-weight: 800;
+  letter-spacing: 4px; border-radius: 8px; margin: 4px 0;
 }
+/* 进攻方——金色边框+深色背景 */
 .check-banner.attacker {
-  background: #c0392b; color: #fff;
-  animation: checkBannerFlash 0.6s ease-in-out infinite;
+  background: #2c1810; color: #f0c040;
+  border: 3px solid #f0c040;
+  animation: attackerPulse 1.5s ease-in-out infinite;
 }
+/* 被将方——红色背景+白色字+剧烈抖动 */
 .check-banner.defender {
-  background: #ff4444; color: #fff;
-  animation: checkBannerFlash 0.4s ease-in-out infinite;
+  background: #cc0000; color: #fff;
+  border: 3px solid #ff4444;
+  animation: defenderShake 0.3s ease-in-out infinite;
 }
-@keyframes checkBannerFlash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes attackerPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(240,192,64,0.3); }
+  50% { box-shadow: 0 0 20px rgba(240,192,64,0.7); }
+}
+@keyframes defenderShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
 }
 
 /* ===== 棋盘 ===== */
