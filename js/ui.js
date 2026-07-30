@@ -1,0 +1,427 @@
+/**
+ * UI 界面管理模块
+ * 负责 Canvas 棋盘绘制、选中交互、屏幕切换、玩家卡片、计时显示、弹窗
+ */
+const UI = (() => {
+  let canvas, ctx, board;
+  const screens = {
+    menu: document.getElementById('menu-screen'),
+    game: document.getElementById('game-screen'),
+    online: document.getElementById('online-screen'),
+  };
+  const elements = {};
+
+  // 绘制参数
+  let cellSize = 0, padding = 40, boardPixelW = 0, boardPixelH = 0;
+
+  // 交互状态
+  let selectedPos = null;       // {x, y} 当前选中的棋子
+  let legalMoves = [];          // [{x, y}, ...] 合法目标位置
+  let lastFrom = null;          // {x, y} 上一步起点
+  let lastTo = null;            // {x, y} 上一步终点
+
+  /** 初始化 */
+  function init(boardModule) {
+    board = boardModule;
+    canvas = document.getElementById('board-canvas');
+    ctx = canvas.getContext('2d');
+
+    // 缓存 DOM 元素
+    const ids = [
+      'btn-local','btn-ai-easy','btn-ai-medium','btn-online',
+      'btn-back','btn-undo','btn-restart','btn-online-back',
+      'btn-create-room','btn-join-room','btn-copy-room','btn-paste-room',
+      'btn-play-again','btn-to-menu','btn-request-accept','btn-request-reject',
+      'red-name','red-timer','black-name','black-timer',
+      'red-card','black-card','move-count',
+      'room-id-display','room-info','qr-code','input-room-id',
+      'join-error','win-modal','win-text','request-modal','request-text',
+      'toast','game-hint',
+    ];
+    ids.forEach(id => { elements[id] = document.getElementById(id); });
+
+    window.addEventListener('resize', () => {
+      if (screens.game.classList.contains('active')) resizeCanvas();
+    });
+
+    canvas.addEventListener('click', handleCanvasClick);
+    canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
+
+    registerSW();
+  }
+
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  }
+
+  /** 调整 Canvas 尺寸 */
+  function resizeCanvas() {
+    const wrapper = canvas.parentElement;
+    // 中国象棋棋盘 9:10 比例
+    const maxW = Math.min(wrapper.clientWidth - 16, 450);
+    const maxH = Math.min(window.innerHeight - 160, 550);
+
+    // 保持 9:10 比例
+    let w, h;
+    if (maxW / maxH > 0.9) {
+      h = maxH;
+      w = h * 0.9;
+    } else {
+      w = maxW;
+      h = w / 0.9;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    boardPixelW = w;
+    boardPixelH = h;
+
+    // 棋盘 9x10, cellSize 按行数计算
+    cellSize = (h - padding * 2) / (board.ROWS - 1);
+    // 水平居中棋盘（可能两边多一些 padding）
+    const boardWidth = cellSize * (board.COLS - 1);
+    padding = (w - boardWidth) / 2;
+
+    draw();
+  }
+
+  /** 切换屏幕 */
+  function showScreen(name) {
+    Object.keys(screens).forEach(k => screens[k].classList.toggle('active', k === name));
+  }
+
+  // ==================== Canvas 绘制 ====================
+
+  function draw() {
+    if (!ctx || !canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
+
+    const w = boardPixelW, h = boardPixelH, s = cellSize, p = padding;
+
+    // 棋盘背景
+    ctx.fillStyle = '#c8a96e';
+    ctx.fillRect(0, 0, w, h);
+
+    // 网格线
+    ctx.strokeStyle = '#5c3a1e';
+    ctx.lineWidth = 1;
+
+    // 横线 10 条
+    for (let r = 0; r < board.ROWS; r++) {
+      const y = p + r * s;
+      ctx.beginPath(); ctx.moveTo(p, y); ctx.lineTo(p + (board.COLS - 1) * s, y); ctx.stroke();
+    }
+
+    // 纵线 9 条（河界处断开）
+    for (let c = 0; c < board.COLS; c++) {
+      const x = p + c * s;
+      if (c === 0 || c === board.COLS - 1) {
+        // 边线贯通
+        ctx.beginPath(); ctx.moveTo(x, p); ctx.lineTo(x, p + (board.ROWS - 1) * s); ctx.stroke();
+      } else {
+        // 中间线河界处断开
+        ctx.beginPath(); ctx.moveTo(x, p); ctx.lineTo(x, p + 4 * s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, p + 5 * s); ctx.lineTo(x, p + 9 * s); ctx.stroke();
+      }
+    }
+
+    // 九宫斜线
+    ctx.lineWidth = 0.8;
+    drawPalace(p + 3 * s, p, s);           // 黑方九宫 (上)
+    drawPalace(p + 3 * s, p + 7 * s, s);   // 红方九宫 (下)
+
+    // 河界文字
+    ctx.fillStyle = '#5c3a1e';
+    ctx.font = `${s * 0.55}px KaiTi, STKaiti, serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const riverY = p + 4.5 * s;
+    ctx.fillText('楚  河', p + 2 * s, riverY);
+    ctx.fillText('汉  界', p + 6 * s, riverY);
+
+    // 棋子
+    for (let y = 0; y < board.ROWS; y++) {
+      for (let x = 0; x < board.COLS; x++) {
+        const piece = board.get(x, y);
+        if (piece !== board.EMPTY) {
+          drawPiece(x, y, piece, false);
+        }
+      }
+    }
+
+    // 合法走法提示
+    for (const m of legalMoves) {
+      const mx = p + m.x * s, my = p + m.y * s;
+      if (board.get(m.x, m.y) !== board.EMPTY) {
+        // 可吃子位置 — 红色圆环
+        ctx.strokeStyle = 'rgba(220,50,50,0.7)';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(mx, my, s * 0.44, 0, Math.PI * 2); ctx.stroke();
+      } else {
+        // 空位 — 绿色半透明圆点
+        ctx.fillStyle = 'rgba(0,160,0,0.4)';
+        ctx.beginPath(); ctx.arc(mx, my, s * 0.18, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // 选中高亮
+    if (selectedPos) {
+      const sx = p + selectedPos.x * s, sy = p + selectedPos.y * s;
+      ctx.strokeStyle = 'rgba(255,215,0,0.75)';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
+      // 外发光
+      ctx.strokeStyle = 'rgba(255,215,0,0.35)';
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(sx, sy, s * 0.46, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // 最后一步标记
+    if (lastFrom && lastTo) {
+      [lastFrom, lastTo].forEach(pos => {
+        const lx = p + pos.x * s, ly = p + pos.y * s;
+        ctx.fillStyle = 'rgba(233,68,96,0.3)';
+        ctx.beginPath(); ctx.arc(lx, ly, s * 0.15, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+  }
+
+  function drawPalace(x, y, s) {
+    ctx.strokeStyle = '#5c3a1e';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 2 * s, y + 2 * s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 2 * s, y); ctx.lineTo(x, y + 2 * s); ctx.stroke();
+  }
+
+  function drawPiece(x, y, piece, isFloating) {
+    const px = padding + x * cellSize, py = padding + y * cellSize, r = cellSize * 0.44;
+    const color = board.getColor(piece);
+    const char = board.getChar(piece);
+
+    ctx.save();
+    if (isFloating) {
+      ctx.globalAlpha = 0.6;
+    }
+
+    // 阴影
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+
+    // 底色
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#f5deb3';
+    ctx.fill();
+
+    // 外圈
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = color === board.RED ? '#b03030' : '#1a1a1a';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // 内圈
+    ctx.beginPath();
+    ctx.arc(px, py, r - 4, 0, Math.PI * 2);
+    ctx.strokeStyle = color === board.RED ? '#c0392b' : '#333';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 汉字
+    ctx.fillStyle = color === board.RED ? '#c0392b' : '#1a1a1a';
+    ctx.font = `bold ${r * 1.15}px "KaiTi", "STKaiti", "楷体", "SimSun", serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(char, px, py + 1);
+
+    ctx.restore();
+  }
+
+  // ==================== 交互处理 ====================
+
+  function handleCanvasClick(e) { processTap(e); }
+  function handleCanvasTouch(e) { e.preventDefault(); processTap(e.touches[0]); }
+
+  function processTap(e) {
+    const p = getGridPos(e);
+    if (!p) {
+      // 点击棋盘外 → 取消选中
+      clearSelection();
+      return;
+    }
+
+    const piece = board.get(p.x, p.y);
+
+    if (selectedPos === null) {
+      // 未选中 → 尝试选中己方棋子
+      if (piece !== board.EMPTY && board.getColor(piece) === board.getCurrentPlayer()) {
+        selectPiece(p.x, p.y);
+      }
+    } else if (selectedPos.x === p.x && selectedPos.y === p.y) {
+      // 再次点同一棋子 → 取消选中
+      clearSelection();
+    } else if (legalMoves.some(m => m.x === p.x && m.y === p.y)) {
+      // 点击合法目标 → 执行走子
+      const from = { x: selectedPos.x, y: selectedPos.y };
+      clearSelection();
+      handleMove(from.x, from.y, p.x, p.y);
+    } else if (piece !== board.EMPTY && board.getColor(piece) === board.getCurrentPlayer()) {
+      // 点击另一个己方棋子 → 切换选中
+      selectPiece(p.x, p.y);
+    } else {
+      // 无效位置 → 取消选中
+      clearSelection();
+    }
+  }
+
+  function selectPiece(x, y) {
+    selectedPos = { x, y };
+    legalMoves = board.getLegalMoves(x, y);
+    draw();
+  }
+
+  function clearSelection() {
+    selectedPos = null;
+    legalMoves = [];
+    draw();
+  }
+
+  function getGridPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = boardPixelW / rect.width, scaleY = boardPixelH / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX, my = (e.clientY - rect.top) * scaleY;
+    const col = Math.round((mx - padding) / cellSize), row = Math.round((my - padding) / cellSize);
+    if (col < 0 || col >= board.COLS || row < 0 || row >= board.ROWS) return null;
+    const px = padding + col * cellSize, py = padding + row * cellSize;
+    if (Math.hypot(mx - px, my - py) > cellSize * 0.45) return null;
+    return { x: col, y: row };
+  }
+
+  let onMoveCallback = null;
+  function onMove(cb) { onMoveCallback = cb; }
+  function handleMove(fx, fy, tx, ty) { if (onMoveCallback) onMoveCallback(fx, fy, tx, ty); }
+
+  // ==================== 高亮与标记 ====================
+
+  function setLastMove(fx, fy, tx, ty) {
+    lastFrom = { x: fx, y: fy };
+    lastTo = { x: tx, y: ty };
+    draw();
+  }
+
+  function clearLastMove() {
+    lastFrom = null;
+    lastTo = null;
+  }
+
+  function clearAll() {
+    clearSelection();
+    clearLastMove();
+    draw();
+  }
+
+  // ==================== 玩家卡片 ====================
+
+  function setPlayerCards(rName, rTimer, bName, bTimer, activePlayer) {
+    elements['red-name'].textContent = rName;
+    elements['red-timer'].textContent = rTimer;
+    elements['black-name'].textContent = bName;
+    elements['black-timer'].textContent = bTimer;
+
+    const rCard = elements['red-card'], bCard = elements['black-card'];
+    rCard.classList.toggle('active', activePlayer === board.RED);
+    bCard.classList.toggle('active', activePlayer === board.BLACK);
+  }
+
+  function updateTimerDisplay(player, timeStr) {
+    const el = player === board.RED ? elements['red-timer'] : elements['black-timer'];
+    el.textContent = timeStr;
+  }
+
+  function setTimerUrgent(player, urgent) {
+    const el = player === board.RED ? elements['red-timer'] : elements['black-timer'];
+    el.classList.toggle('urgent', urgent);
+  }
+
+  // ==================== 其他 UI ====================
+
+  function setMoveCount(n) { elements['move-count'].textContent = '第 ' + n + ' 手'; }
+  function setHint(text) { elements['game-hint'].textContent = text || ''; }
+
+  /** 胜利弹窗 */
+  function showWin(player, isOnline) {
+    let text;
+    if (player === board.RED) text = '🔴 红方获胜！';
+    else if (player === board.BLACK) text = '⚫ 黑方获胜！';
+    else text = '🤝 平局！';
+    elements['win-text'].textContent = text;
+    elements['win-modal'].classList.remove('hidden');
+    const playAgainBtn = elements['btn-play-again'];
+    playAgainBtn.textContent = isOnline ? '申请重来' : '再来一局';
+  }
+
+  function hideWin() { elements['win-modal'].classList.add('hidden'); }
+
+  function showRequest(text) {
+    elements['request-text'].textContent = text;
+    elements['request-modal'].classList.remove('hidden');
+  }
+  function hideRequest() { elements['request-modal'].classList.add('hidden'); }
+
+  function showToast(msg, dur = 2000) {
+    const t = elements['toast'];
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.add('hidden'), dur);
+  }
+
+  function showRoomInfo(roomId) {
+    elements['room-id-display'].textContent = roomId;
+    elements['room-info'].classList.remove('hidden');
+    const qr = elements['qr-code']; qr.innerHTML = '';
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qr, {
+        text: location.origin + location.pathname + '?room=' + roomId,
+        width: 140, height: 140,
+        colorDark: '#2c1810', colorLight: '#ffffff',
+      });
+    }
+  }
+
+  function hideRoomInfo() {
+    elements['room-info'].classList.add('hidden');
+    elements['qr-code'].innerHTML = '';
+  }
+
+  function showJoinError(msg) {
+    const el = elements['join-error'];
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+  }
+
+  function getInputRoomId() { return elements['input-room-id'].value.trim(); }
+  function getElement(id) { return elements[id]; }
+
+  return {
+    init, draw, showScreen, resizeCanvas,
+    selectPiece, clearSelection, setLastMove, clearLastMove, clearAll,
+    setPlayerCards, updateTimerDisplay, setTimerUrgent,
+    setMoveCount, setHint,
+    showWin, hideWin, showRequest, hideRequest,
+    showToast, showRoomInfo, hideRoomInfo, showJoinError,
+    getInputRoomId, getElement, onMove,
+  };
+})();

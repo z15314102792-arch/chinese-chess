@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%"><stop offset="0%" stop-color="#3d1c0a"/><stop offset="100%" stop-color="#2c1810"/></radialGradient>
+    <radialGradient id="redPiece" cx="35%" cy="35%"><stop offset="0%" stop-color="#f5deb3"/><stop offset="100%" stop-color="#d4a574"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <!-- 棋盘网格 -->
+  <g stroke="#8b6914" stroke-width="3" opacity="0.6">
+    <line x1="80" y1="120" x2="432" y2="120"/>
+    <line x1="80" y1="240" x2="432" y2="240"/>
+    <line x1="80" y1="360" x2="432" y2="360"/>
+    <line x1="120" y1="80" x2="120" y2="400"/>
+    <line x1="240" y1="80" x2="240" y2="400"/>
+    <line x1="360" y1="80" x2="360" y2="400"/>
+  </g>
+  <!-- 楚河汉界 -->
+  <text x="256" y="265" text-anchor="middle" font-size="28" fill="#8b6914" font-family="KaiTi,STKaiti,serif" opacity="0.5">楚 河　　汉 界</text>
+  <!-- 红子 -->
+  <circle cx="200" cy="340" r="42" fill="url(#redPiece)" stroke="#c0392b" stroke-width="5"/>
+  <text x="200" y="352" text-anchor="middle" font-size="36" font-weight="bold" fill="#c0392b" font-family="KaiTi,STKaiti,serif">帥</text>
+  <!-- 黑子 -->
+  <circle cx="312" cy="180" r="42" fill="url(#redPiece)" stroke="#1a1a1a" stroke-width="5"/>
+  <text x="312" y="192" text-anchor="middle" font-size="36" font-weight="bold" fill="#1a1a1a" font-family="KaiTi,STKaiti,serif">將</text>
+</svg>
