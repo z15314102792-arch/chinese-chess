@@ -31,10 +31,10 @@
         <button id="btn-online" class="btn btn-accent">
           <span class="btn-icon">🌐</span><span>联机对战</span>
         </button>
-        <button id="btn-themes" class="btn btn-secondary">
+        <button id="btn-themes" class="btn btn-secondary" onclick="UI.showScreen('themes')">
           <span class="btn-icon">🎨</span><span>棋盘主题</span>
         </button>
-        <button id="btn-rules" class="btn btn-secondary">
+        <button id="btn-rules" class="btn btn-secondary" onclick="UI.showScreen('rules')">
           <span class="btn-icon">📖</span><span>游戏规则</span>
         </button>
       </div>
@@ -142,7 +142,7 @@
   <!-- 主题选择界面 -->
   <div id="theme-screen" class="screen">
     <div class="theme-header">
-      <button id="btn-theme-back" class="btn-icon-only" title="返回">←</button>
+      <button id="btn-theme-back" class="btn-icon-only" title="返回" onclick="UI.showScreen('menu')">←</button>
       <h2>棋盘主题</h2>
     </div>
     <div class="theme-container">
@@ -153,12 +153,12 @@
   <!-- 游戏规则界面 -->
   <div id="rules-screen" class="screen">
     <div class="rules-header">
-      <button id="btn-rules-back" class="btn-icon-only" title="返回">←</button>
+      <button id="btn-rules-back" class="btn-icon-only" title="返回" onclick="UI.showScreen('menu')">←</button>
       <h2>游戏规则</h2>
     </div>
     <div class="rules-tabs" id="rules-tabs">
-      <button class="rules-tab active" data-tab="basic">基础规则</button>
-      <button class="rules-tab" data-tab="advanced">进阶战术</button>
+      <button class="rules-tab active" data-tab="basic" onclick="switchRulesTab('basic',this)">基础规则</button>
+      <button class="rules-tab" data-tab="advanced" onclick="switchRulesTab('advanced',this)">进阶战术</button>
     </div>
     <div class="rules-content" id="rules-content">
       <!-- 基础规则 -->

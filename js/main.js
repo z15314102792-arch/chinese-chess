@@ -93,8 +93,8 @@ const Main = (() => {
     UI.getElement('btn-ai-easy').addEventListener('click', () => startGame(MODE.AI_EASY));
     UI.getElement('btn-ai-medium').addEventListener('click', () => startGame(MODE.AI_MEDIUM));
     UI.getElement('btn-online').addEventListener('click', showOnlineScreen);
-    UI.getElement('btn-themes').addEventListener('click', () => UI.showScreen('themes'));
-    UI.getElement('btn-rules').addEventListener('click', () => UI.showScreen('rules'));
+    UI.getElement('btn-themes').addEventListener('click', () => { console.log('[Main] 打开主题页'); UI.showScreen('themes'); });
+    UI.getElement('btn-rules').addEventListener('click', () => { console.log('[Main] 打开规则页'); UI.showScreen('rules'); });
     UI.getElement('btn-back').addEventListener('click', confirmBack);
     UI.getElement('btn-undo').addEventListener('click', handleUndo);
     UI.getElement('btn-restart').addEventListener('click', handleRestart);
@@ -805,3 +805,17 @@ const Main = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => Main.init());
+
+/** 规则页 Tab 切换（全局函数，供内联 onclick 调用） */
+function switchRulesTab(tabName, btn) {
+  const tabs = document.getElementById('rules-tabs');
+  if (tabs) {
+    tabs.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', t === btn));
+  }
+  const content = document.getElementById('rules-content');
+  if (content) {
+    content.querySelectorAll('.rules-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'panel-' + tabName);
+    });
+  }
+}
