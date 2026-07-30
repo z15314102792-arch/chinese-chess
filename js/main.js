@@ -501,12 +501,12 @@ const Main = (() => {
     gameOver = false;
     pendingRequest = null;
     Board.reset();
-    UI.clearAll();
     UI.hideWin();
     UI.hideRequest();
     UI.setHint('');
     UI.showScreen('game');
     UI.resizeCanvas();
+    UI.clearAll();
     updatePlayerCards();
     UI.setMoveCount(1);
     UI.showToast('连接成功！' + (isHost ? '你执红先行' : '你执黑，等待对手'));

@@ -99,6 +99,7 @@ const UI = (() => {
 
   function draw() {
     if (!ctx || !canvas || cellSize <= 0) return;
+    try {
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -200,6 +201,7 @@ const UI = (() => {
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(tx, ty, s * 0.28, 0, Math.PI * 2); ctx.stroke();
     }
+    } catch(e) { console.error('draw:', e); }
   }
 
   function drawPalace(x, y, s) {
