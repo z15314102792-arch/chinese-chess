@@ -256,7 +256,7 @@ body.bg-orbs {
     radial-gradient(circle at 80% 20%, rgba(255,130,30,0.45) 0%, transparent 38%),
     radial-gradient(circle at 50% 50%, rgba(255,190,60,0.35) 0%, transparent 42%);
   background-size: 260% 260%;
-  animation: orbDrift 12s ease-in-out infinite;
+  animation: orbDrift 12s linear infinite;
 }
 
 /* ==== 4. 几何星芒 —— 大型放射纹滑动 ==== */
@@ -287,7 +287,7 @@ body.bg-breath {
   background-image: radial-gradient(ellipse at center, #5a28b8 0%, #1e0850 50%, #0c041c 100%);
   background-size: 120% 120%;
   background-position: center;
-  animation: breathePulse 5s ease-in-out infinite;
+  animation: breathePulse 5s linear infinite;
 }
 
 /* ==== 6. 扫描光束 —— linear-gradient 光束横扫 ==== */
@@ -314,7 +314,7 @@ body.bg-aurora {
     linear-gradient(180deg, transparent 0%, rgba(0,220,160,0.20) 20%, rgba(0,180,240,0.15) 40%,
       rgba(100,60,240,0.18) 60%, transparent 85%);
   background-size: 100% 280%;
-  animation: auroraWave 9s ease-in-out infinite;
+  animation: auroraWave 9s linear infinite;
 }
 
 /* ==== 8. 樱花飘落 —— 彩色光点垂直下落 ==== */
@@ -394,7 +394,7 @@ body.bg-lava {
     radial-gradient(ellipse at 70% 30%, rgba(220,60,15,0.30) 0%, transparent 40%),
     radial-gradient(ellipse at 50% 80%, rgba(255,100,30,0.25) 0%, transparent 50%);
   background-size: 240% 240%;
-  animation: lavaFlow 10s ease-in-out infinite;
+  animation: lavaFlow 10s linear infinite;
 }
 
 /* ==== 13. 液态流形 —— 柔光椭圆漂移 + 缩放 ==== */
@@ -412,7 +412,7 @@ body.bg-morph {
     radial-gradient(ellipse at 25% 35%, rgba(190,195,205,0.28) 0%, transparent 55%),
     radial-gradient(ellipse at 75% 55%, rgba(170,175,185,0.22) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(200,205,215,0.20) 0%, transparent 52%);
-  animation: liquidMorph 11s ease-in-out infinite;
+  animation: liquidMorph 11s linear infinite;
 }
 
 /* ==== 14. 星云幻境 —— 多层彩色星云漂移 ==== */
@@ -427,7 +427,7 @@ body.bg-nebula {
     radial-gradient(ellipse at 80% 60%, rgba(40,120,220,0.20) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 30%, rgba(20,180,160,0.18) 0%, transparent 55%);
   background-size: 240% 240%;
-  animation: nebulaDrift 14s ease-in-out infinite;
+  animation: nebulaDrift 14s linear infinite;
 }
 
 /* ==== 15. 冰霜结晶 —— 冰蓝白闪烁粒子 ==== */
@@ -448,11 +448,11 @@ body.bg-frost {
     radial-gradient(2px 2px at 88% 55%, rgba(195,228,255,0.55), transparent),
     radial-gradient(3px 3px at 20% 80%, rgba(175,218,255,0.65), transparent),
     radial-gradient(2px 2px at 55% 45%, rgba(185,225,255,0.50), transparent);
-  animation: frostGlow 4s ease-in-out infinite;
+  animation: frostGlow 4s linear infinite;
 }
 
 /* ==== 16. 极夜星空 —— 密集星场缓慢漂移 ==== */
-@keyframes starDrift { 0% { background-position: 0% 0%; } 100% { background-position: 3% 5%; } }
+@keyframes starDrift { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 3% 5%; } }
 body.bg-stars {
   background-color: #040410;
   background-image:
@@ -471,7 +471,7 @@ body.bg-stars {
     radial-gradient(2px 2px at 18% 88%, rgba(255,255,255,0.70), transparent),
     radial-gradient(1.5px 1.5px at 75% 75%, rgba(210,220,255,0.50), transparent);
   background-size: 120% 120%;
-  animation: starDrift 60s linear infinite alternate;
+  animation: starDrift 60s linear infinite;
 }
 
 /* ==== 17. 雷电脉冲 —— 双光斑交替闪现 ==== */
@@ -490,7 +490,7 @@ body.bg-volt {
     radial-gradient(ellipse at 40% 50%, rgba(100,200,255,0.55) 0%, rgba(60,160,240,0.20) 30%, transparent 60%),
     radial-gradient(ellipse at 65% 45%, rgba(80,180,240,0.45) 0%, transparent 55%);
   background-size: 150% 150%, 100% 100%;
-  animation: voltFlash1 5s ease-in-out infinite, voltFlash2 5s ease-in-out 2s infinite;
+  animation: voltFlash1 5s linear infinite, voltFlash2 5s linear 2s infinite;
 }
 
 /* ==== 18. 晨曦微光 —— 暖杏色呼吸 + 光晕飘移 ==== */
@@ -504,7 +504,7 @@ body.bg-light {
     radial-gradient(ellipse at 40% 40%, rgba(255,245,230,0.65) 0%, transparent 55%),
     radial-gradient(ellipse at 65% 60%, rgba(240,225,200,0.45) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(250,240,220,0.50) 0%, #d8cec0 60%);
-  animation: dawnBreath 7s ease-in-out infinite;
+  animation: dawnBreath 7s linear infinite;
 }
 
 /* ==== 19. 禅意粒子 —— Canvas 驱动，Particles.js ==== */
@@ -524,13 +524,13 @@ body.bg-sand {
     radial-gradient(ellipse at 30% 35%, rgba(255,240,210,0.60) 0%, transparent 50%),
     radial-gradient(ellipse at 70% 65%, rgba(240,220,180,0.45) 0%, transparent 50%);
   background-size: 180% 180%;
-  animation: sandFlow 8s ease-in-out infinite;
+  animation: sandFlow 8s linear infinite;
 }
 
 /* ==== 21. 晴空流云 —— 浅蓝 + 白云飘移 ==== */
 @keyframes skyDrift {
-  0%   { background-position: 20% 40%, 80% 50%; }
-  100% { background-position: 30% 30%, 70% 60%; }
+  0%, 100% { background-position: 20% 40%, 80% 50%; }
+  50%      { background-position: 35% 35%, 65% 65%; }
 }
 body.bg-sky {
   background-color: #c8d8e8;
@@ -538,7 +538,7 @@ body.bg-sky {
     radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.60) 0%, transparent 55%),
     radial-gradient(ellipse at 70% 50%, rgba(240,245,255,0.50) 0%, transparent 50%);
   background-size: 200% 200%;
-  animation: skyDrift 10s ease-in-out infinite alternate;
+  animation: skyDrift 10s linear infinite;
 }
 
 /* ==== 22. 薄荷清风 —— 浅绿 + 柔光摇曳 ==== */
@@ -552,7 +552,7 @@ body.bg-mint {
     radial-gradient(ellipse at 40% 45%, rgba(240,255,240,0.55) 0%, transparent 55%),
     radial-gradient(ellipse at 60% 55%, rgba(220,245,225,0.45) 0%, transparent 50%);
   background-size: 180% 180%;
-  animation: mintSway 9s ease-in-out infinite;
+  animation: mintSway 9s linear infinite;
 }
 
 /* ==== 23. 暮光淡紫 —— 浅紫灰 + 光晕呼吸 ==== */
@@ -565,7 +565,7 @@ body.bg-dusk {
   background-image:
     radial-gradient(ellipse at 50% 50%, rgba(245,235,255,0.55) 0%, transparent 55%),
     radial-gradient(ellipse at 35% 60%, rgba(230,215,240,0.40) 0%, transparent 50%);
-  animation: duskGlow 8s ease-in-out infinite;
+  animation: duskGlow 8s linear infinite;
 }
 
 /* ==== 24. 暗夜微动 —— 极暗底色 + 微妙热噪 ==== */
@@ -579,7 +579,7 @@ body.bg-none {
     radial-gradient(ellipse at 50% 50%, rgba(40,25,15,0.40) 0%, transparent 60%),
     radial-gradient(ellipse at 30% 70%, rgba(30,18,10,0.25) 0%, transparent 50%);
   background-size: 150% 150%;
-  animation: darkShift 12s ease-in-out infinite;
+  animation: darkShift 12s linear infinite;
 }
 
 /* ==================== 预览卡片快照 ==================== */
