@@ -353,9 +353,9 @@ const UI = (() => {
       const t = Math.min(elapsed / ANIM_DURATION, 1);
       // ease-out: 1 - (1-t)^2
       const ease = 1 - (1 - t) * (1 - t);
-      const ax = animFromX + (animToX - animFromX) * ease;
-      const ay = animFromY + (animToY - animFromY) * ease;
-      drawPieceAt(ax, ay, animPiece, false);
+      const gx = animFromX + (animToX - animFromX) * ease;
+      const gy = animFromY + (animToY - animFromY) * ease;
+      drawPieceAt(p + gx * s, p + gy * s, animPiece, false);
     }
 
     // 合法走法提示
