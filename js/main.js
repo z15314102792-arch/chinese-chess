@@ -221,7 +221,7 @@ const Main = (() => {
   }
 
   function isAIMode() {
-    return isAIMode() || currentMode === MODE.AI_HELL;
+    return currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM || currentMode === MODE.AI_HELL;
   }
 
   function getPlayerName(player) {
