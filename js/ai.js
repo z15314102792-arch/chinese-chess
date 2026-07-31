@@ -224,8 +224,77 @@ const AI = (() => {
     return best;
   }
 
+  /**
+   * 地狱模式（娱乐模式）—— "会下棋但会犯错"的AI
+   *
+   * 策略：
+   *  1. 浅搜索评分所有走法（depth=1）
+   *  2. 添加±30%随机噪声打乱排序
+   *  3. 85%概率从前40%走法中随机选（看起来合理）
+   *  4. 15%概率从后50%走法中随机选（"眼瞎"）
+   *  5. 被将军时绝不眼瞎，但可能选非最优应将
+   */
+  function hellMove(board) {
+    const aiColor = board.getCurrentPlayer();
+    const allMoves = board.getAllLegalMoves(aiColor);
+    if (allMoves.length === 0) return null;
+
+    const inCheck = board.isInCheck(aiColor);
+
+    // 评分所有走法
+    const scored = [];
+    for (const m of allMoves) {
+      const saved = board.getState();
+      const captured = board.get(m.tx, m.ty);
+      board.movePiece(m.fx, m.fy, m.tx, m.ty);
+      board.switchPlayer();
+      const opp = aiColor === Board.RED ? Board.BLACK : Board.RED;
+      let score = evaluateFast(board, aiColor);
+      const gaveCheck = board.isInCheck(opp);
+      const mobility = board.getAllLegalMoves(aiColor).length;
+      board.loadState(saved);
+
+      // 吃子奖励（攻击性）
+      if (captured !== Board.EMPTY) score += getValue(captured, m.ty) * 0.35;
+      // 将军奖励（给用户刺激感）
+      if (gaveCheck) score += 60;
+      // 灵活度微调
+      score += mobility * 0.8;
+
+      scored.push({ move: m, score });
+    }
+
+    // 按评分排序
+    scored.sort((a, b) => b.score - a.score);
+
+    // 眼瞎概率：不被将时 18%，被将时 0%（必须应将）
+    const blindChance = inCheck ? 0 : 0.18;
+
+    if (Math.random() < blindChance) {
+      // 从后半截随机选（但不能选最差的几个）
+      const start = Math.floor(scored.length * 0.45);
+      const end = Math.max(start + 2, scored.length - 1);
+      const pool = scored.slice(start, end);
+      if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)].move;
+    }
+
+    // 正常情况：从前40%随机选（至少3步），加±25%噪声
+    const topN = Math.max(3, Math.ceil(scored.length * 0.4));
+    const pool = scored.slice(0, topN).map(s => ({
+      move: s.move,
+      noise: s.score * (0.75 + Math.random() * 0.5), // 0.75 ~ 1.25 倍
+    }));
+    pool.sort((a, b) => b.noise - a.noise);
+
+    // 从前30%随机选一个（不总是最好的）
+    const pickN = Math.max(2, Math.ceil(pool.length * 0.3));
+    const finalPool = pool.slice(0, pickN);
+    return finalPool[Math.floor(Math.random() * finalPool.length)].move;
+  }
+
   function getMove(board, difficulty) {
     if (difficulty === 'medium') return mediumMove(board);
+    if (difficulty === 'hell') return hellMove(board);
     return easyMove(board);
   }
 

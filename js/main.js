@@ -13,6 +13,7 @@ const Main = (() => {
     LOCAL: 'local',
     AI_EASY: 'ai-easy',
     AI_MEDIUM: 'ai-medium',
+    AI_HELL: 'ai-hell',
     ONLINE: 'online',
   };
 
@@ -95,6 +96,7 @@ const Main = (() => {
     UI.getElement('btn-online').addEventListener('click', showOnlineScreen);
     UI.getElement('btn-themes').addEventListener('click', () => { console.log('[Main] 打开主题页'); UI.showScreen('themes'); });
     UI.getElement('btn-rules').addEventListener('click', () => { console.log('[Main] 打开规则页'); UI.showScreen('rules'); });
+    UI.getElement('btn-ai-hell').addEventListener('click', () => startGame(MODE.AI_HELL));
     UI.getElement('btn-back').addEventListener('click', confirmBack);
     UI.getElement('btn-undo').addEventListener('click', handleUndo);
     UI.getElement('btn-restart').addEventListener('click', handleRestart);
@@ -192,7 +194,7 @@ const Main = (() => {
     UI.setMoveCount(1);
 
     // 人机不计时
-    if (currentMode !== MODE.AI_EASY && currentMode !== MODE.AI_MEDIUM) {
+    if (!isAIMode()) {
       startTimer(Board.RED);
     }
 
@@ -211,18 +213,22 @@ const Main = (() => {
     const canUndo = !gameOver && !aiThinking && historyLen > 0;
     if (currentMode === MODE.ONLINE) {
       UI.getElement('btn-undo').disabled = !(canUndo && isMyTurn);
-    } else if (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM) {
+    } else if (isAIMode()) {
       UI.getElement('btn-undo').disabled = !(canUndo && historyLen >= 2);
     } else {
       UI.getElement('btn-undo').disabled = !canUndo;
     }
   }
 
+  function isAIMode() {
+    return isAIMode() || currentMode === MODE.AI_HELL;
+  }
+
   function getPlayerName(player) {
     if (currentMode === MODE.LOCAL) {
       return player === Board.RED ? '红方' : '黑方';
     }
-    if (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM) {
+    if (isAIMode()) {
       return player === Board.RED ? '你' : 'AI';
     }
     if (currentMode === MODE.ONLINE) {
@@ -242,7 +248,7 @@ const Main = (() => {
   /** 将军提醒——从「人类玩家」视角判断（非当前回合方） */
   function showCheckStatus() {
     const banner = document.getElementById('check-banner');
-    const isAI = (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM);
+    const isAI = (isAIMode());
     const isOnline = (currentMode === MODE.ONLINE);
 
     // 确定人类玩家颜色
@@ -335,17 +341,26 @@ const Main = (() => {
     updatePlayerCards();
 
     // 重启计时器（人机不计时）
-    const isAI = (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM);
+    const isAI = (isAIMode());
     if (!gameOver && !isAI) startTimer(Board.getCurrentPlayer());
 
     // AI 模式
     if (!gameOver && isAI) {
       aiThinking = true;
-      const diffLabel = currentMode === MODE.AI_EASY ? '简单' : '中等';
+      let diffKey, diffLabel, thinkTime;
+      if (currentMode === MODE.AI_HELL) {
+        diffKey = 'hell'; diffLabel = '地狱';
+        thinkTime = 300 + Math.random() * 300; // 0.3~0.6s 快节奏
+      } else if (currentMode === MODE.AI_MEDIUM) {
+        diffKey = 'medium'; diffLabel = '中等';
+        thinkTime = 800 + Math.random() * 2200;
+      } else {
+        diffKey = 'easy'; diffLabel = '简单';
+        thinkTime = 800 + Math.random() * 2200;
+      }
       UI.setHint('AI 思考中（' + diffLabel + '）…');
-      const thinkTime = 800 + Math.random() * 2200;
       setTimeout(() => {
-        const move = AI.getMove(Board, currentMode === MODE.AI_EASY ? 'easy' : 'medium');
+        const move = AI.getMove(Board, diffKey);
         if (move) {
           Board.movePiece(move.fx, move.fy, move.tx, move.ty);
           UI.startMoveAnimation(move.fx, move.fy, move.tx, move.ty, Board.get(move.tx, move.ty));
@@ -394,7 +409,7 @@ const Main = (() => {
 
     if (currentMode === MODE.LOCAL) {
       doLocalUndo();
-    } else if (currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM) {
+    } else if (isAIMode()) {
       doAiUndo();
     } else if (currentMode === MODE.ONLINE) {
       if (!isMyTurn) { UI.showToast('只有你的回合才能申请悔棋'); return; }
@@ -485,7 +500,7 @@ const Main = (() => {
       return;
     }
 
-    if (currentMode === MODE.LOCAL || currentMode === MODE.AI_EASY || currentMode === MODE.AI_MEDIUM) {
+    if (currentMode === MODE.LOCAL || isAIMode()) {
       startGame(currentMode);
     } else if (currentMode === MODE.ONLINE) {
       if (pendingRequest) { UI.showToast('已有待处理请求'); return; }

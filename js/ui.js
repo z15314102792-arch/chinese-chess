@@ -218,7 +218,7 @@ const UI = (() => {
       'room-id-display','room-info','input-room-id',
       'join-error','win-modal','win-text','request-modal','request-text',
       'toast','game-hint',
-      'btn-themes','btn-rules','btn-theme-back','btn-rules-back',
+      'btn-themes','btn-rules','btn-ai-hell','btn-theme-back','btn-rules-back',
       'theme-grid-board','theme-grid-bg','theme-tabs','rules-tabs',
     ];
     ids.forEach(id => { elements[id] = document.getElementById(id); });
